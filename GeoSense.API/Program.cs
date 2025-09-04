@@ -13,9 +13,15 @@ namespace GeoSense.API
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            // Repositórios do domínio
             builder.Services.AddScoped<IMotoRepository, MotoRepository>();
-            builder.Services.AddScoped<MotoService>();
 
+            // Serviços de aplicação
+            builder.Services.AddScoped<MotoService>();
+            builder.Services.AddScoped<VagaService>();
+            builder.Services.AddScoped<DashboardService>();
+
+            // AutoMapper profile
             builder.Services.AddAutoMapper(typeof(MappingProfile));
 
             var connectionString = builder.Configuration.GetConnectionString("Oracle");
