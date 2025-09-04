@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using GeoSense.API.Infrastructure.Mappings;
+using GeoSense.API.src.Infrastructure.Mappings;
 using GeoSense.API.src.Domain.Entities;
 
 namespace GeoSense.API.src.Infrastructure.Contexts
