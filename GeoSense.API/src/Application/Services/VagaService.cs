@@ -1,4 +1,5 @@
 ﻿using GeoSense.API.src.Application.DTOs;
+using GeoSense.API.src.Domain.Entities;
 using GeoSense.API.src.Domain.Enums;
 using GeoSense.API.src.Infrastructure.Contexts;
 using Microsoft.EntityFrameworkCore;
@@ -14,23 +15,85 @@ namespace GeoSense.API.src.Application.Services
             _context = context;
         }
 
-        public async Task<VagasStatusDTO> ObterVagasLivresAsync()
+        public async Task<List<VagaDTO>> ObterTodasAsync()
         {
-            // Busca apenas vagas com Status LIVRE, e seleciona apenas os campos necessários
-            var vagasLivres = await _context.Vagas
-                .Where(v => v.Status == StatusVaga.LIVRE)
-                .Select(v => v.Tipo)
+            return await _context.Vagas
+                .Select(v => new VagaDTO
+                {
+                    Numero = v.Numero,
+                    Tipo = (int)v.Tipo,
+                    Status = (int)v.Status,
+                    PatioId = v.PatioId
+                })
                 .ToListAsync();
+        }
 
-            // Conta as categorias de forma simples e direta
-            var livresComProblema = vagasLivres.Count(tipo => tipo != TipoVaga.Sem_Problema);
-            var livresSemProblema = vagasLivres.Count(tipo => tipo == TipoVaga.Sem_Problema);
+        public async Task<VagaDTO?> ObterPorIdAsync(long id)
+        {
+            var v = await _context.Vagas.FindAsync(id);
+            if (v == null) return null;
 
-            return new VagasStatusDTO
+            return new VagaDTO
             {
-                LivresComProblema = livresComProblema,
-                LivresSemProblema = livresSemProblema
+                Numero = v.Numero,
+                Tipo = (int)v.Tipo,
+                Status = (int)v.Status,
+                PatioId = v.PatioId
             };
+        }
+
+        public async Task<long?> CriarAsync(VagaDTO dto)
+        {
+            var vaga = new Vaga(dto.Numero, dto.PatioId);
+            vaga.AlterarTipo((TipoVaga)dto.Tipo);
+
+            // Para alterar status, adicione método no domínio:
+            if ((StatusVaga)dto.Status == StatusVaga.OCUPADA)
+                vaga.Ocupar();
+            else
+                vaga.Liberar();
+
+            _context.Vagas.Add(vaga);
+            await _context.SaveChangesAsync();
+            return vaga.Id;
+        }
+
+        public async Task<bool> AtualizarAsync(long id, VagaDTO dto)
+        {
+            var vaga = await _context.Vagas.FindAsync(id);
+            if (vaga == null) return false;
+
+            // Atualize usando métodos do domínio:
+            // Atualiza número apenas se for diferente
+            if (vaga.Numero != dto.Numero)
+            {
+                // Idealmente, adicione método AlterarNumero(int numero) no domínio.
+                var numeroProp = typeof(Vaga).GetProperty("Numero", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public);
+                numeroProp?.SetValue(vaga, dto.Numero);
+            }
+
+            vaga.AlterarTipo((TipoVaga)dto.Tipo);
+
+            if ((StatusVaga)dto.Status == StatusVaga.OCUPADA)
+                vaga.Ocupar();
+            else
+                vaga.Liberar();
+
+            // Atualize PatioId (caso necessário)
+            var patioIdProp = typeof(Vaga).GetProperty("PatioId", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public);
+            patioIdProp?.SetValue(vaga, dto.PatioId);
+
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> RemoverAsync(long id)
+        {
+            var vaga = await _context.Vagas.FindAsync(id);
+            if (vaga == null) return false;
+            _context.Vagas.Remove(vaga);
+            await _context.SaveChangesAsync();
+            return true;
         }
     }
 }
