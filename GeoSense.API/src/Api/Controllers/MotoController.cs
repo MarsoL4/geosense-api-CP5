@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using GeoSense.API.src.Application.DTOs;
-using GeoSense.API.src.Domain.Entities;
-using GeoSense.API.src.Infrastructure.Contexts;
+using GeoSense.API.src.Application.Services;
 
 namespace GeoSense.API.src.Api.Controllers
 {
@@ -10,88 +8,58 @@ namespace GeoSense.API.src.Api.Controllers
     [ApiController]
     public class MotoController : ControllerBase
     {
-        private readonly GeoSenseContext _context;
+        private readonly MotoService _motoService;
 
-        public MotoController(GeoSenseContext context)
+        public MotoController(MotoService motoService)
         {
-            _context = context;
+            _motoService = motoService;
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Moto>>> GetMotos()
+        public async Task<ActionResult<IEnumerable<MotoListagemDTO>>> GetMotos()
         {
-            return await _context.Motos
-                .Include(m => m.Vaga) // opcional: traz o relacionamento
-                .ToListAsync();
+            var motos = await _motoService.ObterTodasAsync();
+            return Ok(motos);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Moto>> GetMoto(long id)
+        public async Task<ActionResult<MotoDetalhesDTO>> GetMoto(long id)
         {
-            var moto = await _context.Motos
-                .Include(m => m.Vaga)
-                .FirstOrDefaultAsync(m => m.Id == id);
-
+            var moto = await _motoService.ObterPorIdAsync(id);
             if (moto == null)
-            {
                 return NotFound();
-            }
 
-            return moto;
+            return Ok(moto);
+        }
+
+        [HttpPost]
+        public async Task<ActionResult<MotoDetalhesDTO>> PostMoto(MotoDTO dto)
+        {
+            var moto = await _motoService.CriarAsync(dto);
+            if (moto == null)
+                return BadRequest();
+
+            return CreatedAtAction(nameof(GetMoto), new { id = moto.Id }, moto);
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> PutMoto(long id, MotoDTO dto)
         {
-            var moto = await _context.Motos.FindAsync(id);
-            if (moto == null)
+            var updated = await _motoService.AtualizarAsync(id, dto);
+            if (!updated)
                 return NotFound();
 
-            // atualiza os campos com os dados do DTO
-            moto.Modelo = dto.Modelo;
-            moto.Placa = dto.Placa;
-            moto.Chassi = dto.Chassi;
-            moto.ProblemaIdentificado = dto.ProblemaIdentificado;
-            moto.VagaId = dto.VagaId;
-
-            await _context.SaveChangesAsync();
             return NoContent();
-        }
-
-        [HttpPost]
-        public async Task<ActionResult<Moto>> PostMoto(MotoDTO dto)
-        {
-            var novaMoto = new Moto
-            {
-                Modelo = dto.Modelo,
-                Placa = dto.Placa,
-                Chassi = dto.Chassi,
-                ProblemaIdentificado = dto.ProblemaIdentificado,
-                VagaId = dto.VagaId
-            };
-
-            _context.Motos.Add(novaMoto);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction(nameof(GetMoto), new { id = novaMoto.Id }, novaMoto);
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteMoto(long id)
         {
-            var moto = await _context.Motos.FindAsync(id);
-            if (moto == null)
+            var deleted = await _motoService.RemoverAsync(id);
+            if (!deleted)
                 return NotFound();
 
-            _context.Motos.Remove(moto);
-            await _context.SaveChangesAsync();
-
             return NoContent();
-        }
-
-        private bool MotoExists(long id)
-        {
-            return _context.Motos.Any(e => e.Id == id);
         }
     }
 }
