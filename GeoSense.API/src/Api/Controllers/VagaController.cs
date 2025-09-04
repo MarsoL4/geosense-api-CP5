@@ -1,9 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using GeoSense.API.src.Application.DTOs;
-using GeoSense.API.src.Domain.Entities;
-using GeoSense.API.src.Domain.Enums;
-using GeoSense.API.src.Infrastructure.Contexts;
+using GeoSense.API.src.Application.Services;
 
 namespace GeoSense.API.src.Api.Controllers
 {
@@ -11,77 +8,58 @@ namespace GeoSense.API.src.Api.Controllers
     [ApiController]
     public class VagaController : ControllerBase
     {
-        private readonly GeoSenseContext _context;
+        private readonly VagaService _vagaService;
 
-        public VagaController(GeoSenseContext context)
+        public VagaController(VagaService vagaService)
         {
-            _context = context;
+            _vagaService = vagaService;
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Vaga>>> GetVagas()
+        public async Task<ActionResult<IEnumerable<VagaDTO>>> GetVagas()
         {
-            return await _context.Vagas.ToListAsync();
+            var vagas = await _vagaService.ObterTodasAsync();
+            return Ok(vagas);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Vaga>> GetVaga(long id)
+        public async Task<ActionResult<VagaDTO>> GetVaga(long id)
         {
-            var vaga = await _context.Vagas.FindAsync(id);
-
+            var vaga = await _vagaService.ObterPorIdAsync(id);
             if (vaga == null)
                 return NotFound();
 
-            return vaga;
+            return Ok(vaga);
         }
 
         [HttpPost]
-        public async Task<ActionResult<Vaga>> PostVaga(VagaDTO dto)
+        public async Task<ActionResult> PostVaga(VagaDTO dto)
         {
-            var novaVaga = new Vaga(dto.Numero, dto.PatioId);
+            var id = await _vagaService.CriarAsync(dto);
+            if (id == null)
+                return BadRequest();
 
-            // caso queira permitir personalização opcional do tipo/status:
-            novaVaga.GetType().GetProperty("Tipo")?.SetValue(novaVaga, (TipoVaga)dto.Tipo);
-            novaVaga.GetType().GetProperty("Status")?.SetValue(novaVaga, (StatusVaga)dto.Status);
-
-            _context.Vagas.Add(novaVaga);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction(nameof(GetVaga), new { id = novaVaga.Id }, novaVaga);
+            return CreatedAtAction(nameof(GetVaga), new { id }, dto);
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> PutVaga(long id, VagaDTO dto)
         {
-            var vaga = await _context.Vagas.FindAsync(id);
-            if (vaga == null)
+            var updated = await _vagaService.AtualizarAsync(id, dto);
+            if (!updated)
                 return NotFound();
 
-            // atualizações possíveis — via reflexão por causa dos setters privados
-            vaga.GetType().GetProperty("Numero")?.SetValue(vaga, dto.Numero);
-            vaga.GetType().GetProperty("Tipo")?.SetValue(vaga, (TipoVaga)dto.Tipo);
-            vaga.GetType().GetProperty("Status")?.SetValue(vaga, (StatusVaga)dto.Status);
-            vaga.GetType().GetProperty("PatioId")?.SetValue(vaga, dto.PatioId);
-
-            await _context.SaveChangesAsync();
             return NoContent();
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteVaga(long id)
         {
-            var vaga = await _context.Vagas.FindAsync(id);
-            if (vaga == null)
+            var deleted = await _vagaService.RemoverAsync(id);
+            if (!deleted)
                 return NotFound();
 
-            _context.Vagas.Remove(vaga);
-            await _context.SaveChangesAsync();
             return NoContent();
-        }
-
-        private bool VagaExists(long id)
-        {
-            return _context.Vagas.Any(v => v.Id == id);
         }
     }
 }
