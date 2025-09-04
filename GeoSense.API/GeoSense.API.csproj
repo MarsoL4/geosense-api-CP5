@@ -24,7 +24,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="src\Domain\ValueObjects\" />
     <Folder Include="src\Infrastructure\Migrations\" />
   </ItemGroup>
 

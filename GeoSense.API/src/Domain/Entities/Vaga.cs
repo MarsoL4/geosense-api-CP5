@@ -1,5 +1,4 @@
-﻿using GeoSense.API.Domain;
-using GeoSense.API.src.Domain.Enums;
+﻿using GeoSense.API.src.Domain.Enums;
 
 namespace GeoSense.API.src.Domain.Entities
 {
@@ -9,10 +8,11 @@ namespace GeoSense.API.src.Domain.Entities
         public int Numero { get; private set; }
         public TipoVaga Tipo { get; private set; }
         public StatusVaga Status { get; private set; }
-
-        // N...1 (muitas vagas pertencem a um pátio)
         public long PatioId { get; private set; }
         public virtual Patio Patio { get; set; }
+
+        public ICollection<Moto> Motos { get; set; } = new List<Moto>();
+        public ICollection<AlocacaoMoto> Alocacoes { get; set; } = new List<AlocacaoMoto>();
 
         protected Vaga() { }
 
@@ -24,7 +24,23 @@ namespace GeoSense.API.src.Domain.Entities
             PatioId = patioId;
         }
 
-        public ICollection<Moto> Motos { get; set; } = new List<Moto>();
-        public ICollection<AlocacaoMoto> Alocacoes { get; set; } = new List<AlocacaoMoto>();
+        public void Ocupar()
+        {
+            if (Status == StatusVaga.OCUPADA)
+                throw new InvalidOperationException("A vaga já está ocupada.");
+            Status = StatusVaga.OCUPADA;
+        }
+
+        public void Liberar()
+        {
+            if (Status == StatusVaga.LIVRE)
+                throw new InvalidOperationException("A vaga já está livre.");
+            Status = StatusVaga.LIVRE;
+        }
+
+        public void AlterarTipo(TipoVaga novoTipo)
+        {
+            Tipo = novoTipo;
+        }
     }
 }
