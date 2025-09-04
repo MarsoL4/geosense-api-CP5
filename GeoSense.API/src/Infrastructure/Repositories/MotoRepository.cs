@@ -28,5 +28,23 @@ namespace GeoSense.API.src.Infrastructure.Repositories
                 .Include(m => m.Defeitos)
                 .FirstOrDefaultAsync(m => m.Id == id);
         }
+
+        public async Task AdicionarAsync(Moto moto)
+        {
+            _context.Motos.Add(moto);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task AtualizarAsync(Moto moto)
+        {
+            _context.Motos.Update(moto);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task RemoverAsync(Moto moto)
+        {
+            _context.Motos.Remove(moto);
+            await _context.SaveChangesAsync();
+        }
     }
 }
