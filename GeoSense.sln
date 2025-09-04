@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.13.35818.85 d17.13
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GeoSense.API", "GeoSense.API\GeoSense.API.csproj", "{6C7C139E-715E-405D-9FA6-51B089C9AABD}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6C7C139E-715E-405D-9FA6-51B089C9AABD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6C7C139E-715E-405D-9FA6-51B089C9AABD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6C7C139E-715E-405D-9FA6-51B089C9AABD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6C7C139E-715E-405D-9FA6-51B089C9AABD}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {8FB79E57-258C-4DB1-BD2F-D3FB85FD25C9}
+	EndGlobalSection
+EndGlobal
