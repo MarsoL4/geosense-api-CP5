@@ -6,5 +6,8 @@ namespace GeoSense.API.src.Domain.Repositories.Interfaces
     {
         Task<List<Moto>> ObterTodasAsync();
         Task<Moto> ObterPorIdComVagaEDefeitosAsync(long id);
+        Task AdicionarAsync(Moto moto);
+        Task AtualizarAsync(Moto moto);
+        Task RemoverAsync(Moto moto);
     }
 }
