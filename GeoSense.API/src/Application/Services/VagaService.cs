@@ -47,7 +47,6 @@ namespace GeoSense.API.src.Application.Services
             var vaga = new Vaga(dto.Numero, dto.PatioId);
             vaga.AlterarTipo((TipoVaga)dto.Tipo);
 
-            // Para alterar status, adicione método no domínio:
             if ((StatusVaga)dto.Status == StatusVaga.OCUPADA)
                 vaga.Ocupar();
             else
@@ -63,14 +62,8 @@ namespace GeoSense.API.src.Application.Services
             var vaga = await _context.Vagas.FindAsync(id);
             if (vaga == null) return false;
 
-            // Atualize usando métodos do domínio:
-            // Atualiza número apenas se for diferente
             if (vaga.Numero != dto.Numero)
-            {
-                // Idealmente, adicione método AlterarNumero(int numero) no domínio.
-                var numeroProp = typeof(Vaga).GetProperty("Numero", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public);
-                numeroProp?.SetValue(vaga, dto.Numero);
-            }
+                vaga.AlterarNumero(dto.Numero);
 
             vaga.AlterarTipo((TipoVaga)dto.Tipo);
 
@@ -79,9 +72,8 @@ namespace GeoSense.API.src.Application.Services
             else
                 vaga.Liberar();
 
-            // Atualize PatioId (caso necessário)
-            var patioIdProp = typeof(Vaga).GetProperty("PatioId", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public);
-            patioIdProp?.SetValue(vaga, dto.PatioId);
+            if (vaga.PatioId != dto.PatioId)
+                vaga.AlterarPatio(dto.PatioId);
 
             await _context.SaveChangesAsync();
             return true;

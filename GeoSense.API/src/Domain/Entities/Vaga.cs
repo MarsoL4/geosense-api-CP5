@@ -42,5 +42,19 @@ namespace GeoSense.API.src.Domain.Entities
         {
             Tipo = novoTipo;
         }
+
+        public void AlterarNumero(int novoNumero)
+        {
+            if (novoNumero <= 0)
+                throw new ArgumentException("O número da vaga deve ser positivo.");
+            Numero = novoNumero;
+        }
+
+        public void AlterarPatio(long novoPatioId)
+        {
+            if (novoPatioId <= 0)
+                throw new ArgumentException("ID de pátio inválido.");
+            PatioId = novoPatioId;
+        }
     }
 }
