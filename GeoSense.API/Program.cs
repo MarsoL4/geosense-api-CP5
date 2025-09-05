@@ -1,9 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using GeoSense.API.src.Infrastructure.Mappings;
 using GeoSense.API.src.Infrastructure.Repositories;
 using GeoSense.API.src.Domain.Repositories.Interfaces;
 using GeoSense.API.src.Application.Services;
 using GeoSense.API.src.Infrastructure.Contexts;
+using GeoSense.API.src.Api.AutoMapper;
 
 namespace GeoSense.API
 {
