@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.13.35818.85 d17.13
+VisualStudioVersion = 17.13.35818.85
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GeoSense.API", "GeoSense.API\GeoSense.API.csproj", "{6C7C139E-715E-405D-9FA6-51B089C9AABD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GeoSense.API.Tests", "GeoSense.API.Tests\GeoSense.API.Tests.csproj", "{17C36503-5FEC-437B-8333-6BDEDE552707}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{6C7C139E-715E-405D-9FA6-51B089C9AABD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6C7C139E-715E-405D-9FA6-51B089C9AABD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6C7C139E-715E-405D-9FA6-51B089C9AABD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{17C36503-5FEC-437B-8333-6BDEDE552707}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{17C36503-5FEC-437B-8333-6BDEDE552707}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{17C36503-5FEC-437B-8333-6BDEDE552707}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{17C36503-5FEC-437B-8333-6BDEDE552707}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
