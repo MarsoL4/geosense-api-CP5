@@ -4,11 +4,11 @@ using GeoSense.API.Controllers;
 using GeoSense.API.DTOs.Usuario;
 using GeoSense.API.Infrastructure.Contexts;
 using GeoSense.API.Infrastructure.Repositories;
-using GeoSense.API.Infrastructure.Repositories.Interfaces;
 using GeoSense.API.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using GeoSense.API.Infrastructure.Persistence;
+using GeoSense.API.Domain.Repositories;
 
 namespace GeoSense.API.Tests
 {

@@ -2,7 +2,6 @@
 using GeoSense.API.Controllers;
 using GeoSense.API.Infrastructure.Contexts;
 using GeoSense.API.Infrastructure.Repositories;
-using GeoSense.API.Infrastructure.Repositories.Interfaces;
 using GeoSense.API.Services;
 using Microsoft.EntityFrameworkCore;
 using GeoSense.API.DTOs;
@@ -11,6 +10,7 @@ using AutoMapper;
 using GeoSense.API.AutoMapper;
 using GeoSense.API.DTOs.Moto;
 using GeoSense.API.Infrastructure.Persistence;
+using GeoSense.API.Domain.Repositories;
 
 namespace GeoSense.API.Tests
 {

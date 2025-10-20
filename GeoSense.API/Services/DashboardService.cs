@@ -1,18 +1,19 @@
-﻿using GeoSense.API.Infrastructure.Repositories.Interfaces;
+﻿using GeoSense.API.Domain.Repositories;
+using System.Threading.Tasks;
 
 namespace GeoSense.API.Services
 {
-    /// <summary>
-    /// Serviço responsável por retornar dados agregados para o dashboard.
-    /// </summary>
-    public class DashboardService(IMotoRepository motoRepo, IVagaRepository vagaRepo)
+    public class DashboardService
     {
-        private readonly IMotoRepository _motoRepo = motoRepo;
-        private readonly IVagaRepository _vagaRepo = vagaRepo;
+        private readonly IMotoRepository _motoRepo;
+        private readonly IVagaRepository _vagaRepo;
 
-        /// <summary>
-        /// Retorna dados agregados para o dashboard: totais de motos, vagas e problemas.
-        /// </summary>
+        public DashboardService(IMotoRepository motoRepo, IVagaRepository vagaRepo)
+        {
+            _motoRepo = motoRepo;
+            _vagaRepo = vagaRepo;
+        }
+
         public async Task<object> ObterDashboardDataAsync()
         {
             var motos = await _motoRepo.ObterTodasAsync();

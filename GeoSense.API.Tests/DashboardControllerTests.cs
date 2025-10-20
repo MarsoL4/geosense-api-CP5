@@ -2,11 +2,11 @@
 using GeoSense.API.Controllers;
 using GeoSense.API.Infrastructure.Contexts;
 using GeoSense.API.Infrastructure.Repositories;
-using GeoSense.API.Infrastructure.Repositories.Interfaces;
 using GeoSense.API.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
+using GeoSense.API.Domain.Repositories;
 
 namespace GeoSense.API.Tests
 {

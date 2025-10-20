@@ -1,54 +1,27 @@
-﻿using GeoSense.API.DTOs.Moto;
+﻿using GeoSense.API.Domain.Repositories;
 using GeoSense.API.Infrastructure.Persistence;
-using GeoSense.API.Infrastructure.Repositories.Interfaces;
+using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace GeoSense.API.Services
 {
-    /// <summary>
-    /// Serviço de regras de negócio para motos.
-    /// </summary>
-    public class MotoService(IMotoRepository repo)
+    public class MotoService
     {
-        private readonly IMotoRepository _repo = repo;
+        private readonly IMotoRepository _repo;
 
-        /// <summary>
-        /// Retorna todas as motos cadastradas.
-        /// </summary>
-        public async Task<List<Moto>> ObterTodasAsync()
+        public MotoService(IMotoRepository repo)
         {
-            return await _repo.ObterTodasAsync();
+            _repo = repo;
         }
 
-        /// <summary>
-        /// Retorna os detalhes de uma moto pelo id.
-        /// </summary>
-        public async Task<Moto?> ObterPorIdAsync(long id)
-        {
-            return await _repo.ObterPorIdComVagaEDefeitosAsync(id);
-        }
+        public async Task<List<Moto>> ObterTodasAsync() => await _repo.ObterTodasAsync();
 
-        /// <summary>
-        /// Adiciona uma nova moto.
-        /// </summary>
-        public async Task<Moto> AdicionarAsync(Moto moto)
-        {
-            return await _repo.AdicionarAsync(moto);
-        }
+        public async Task<Moto?> ObterPorIdAsync(long id) => await _repo.ObterPorIdComVagaEDefeitosAsync(id);
 
-        /// <summary>
-        /// Atualiza os dados de uma moto existente.
-        /// </summary>
-        public async Task AtualizarAsync(Moto moto)
-        {
-            await _repo.AtualizarAsync(moto);
-        }
+        public async Task<Moto> AdicionarAsync(Moto moto) => await _repo.AdicionarAsync(moto);
 
-        /// <summary>
-        /// Remove uma moto do sistema.
-        /// </summary>
-        public async Task RemoverAsync(Moto moto)
-        {
-            await _repo.RemoverAsync(moto);
-        }
+        public async Task AtualizarAsync(Moto moto) => await _repo.AtualizarAsync(moto);
+
+        public async Task RemoverAsync(Moto moto) => await _repo.RemoverAsync(moto);
     }
 }
