@@ -9,6 +9,6 @@ namespace GeoSense.API.DTOs.Patio
     {
         public long Id { get; set; }
         public required string Nome { get; set; }
-        public List<VagaDTO> Vagas { get; set; } = [];
+        public List<VagaDTO> Vagas { get; set; } = new List<VagaDTO>();
     }
 }

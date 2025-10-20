@@ -10,10 +10,11 @@ namespace GeoSense.API.Infrastructure.Persistence
     public class Vaga
     {
         public long Id { get; private set; }
-        public int Numero { get; private set; }
-        public TipoVaga Tipo { get; private set; }
-        public StatusVaga Status { get; private set; }
-        public long PatioId { get; private set; }
+
+        public int Numero { get; set; }
+        public TipoVaga Tipo { get; set; }
+        public StatusVaga Status { get; set; }
+        public long PatioId { get; set; }
 
         /// <summary>
         /// Pátio ao qual essa vaga pertence.
@@ -33,6 +34,6 @@ namespace GeoSense.API.Infrastructure.Persistence
         /// <summary>
         /// Motos que estão alocadas nesta vaga.
         /// </summary>
-        public ICollection<Moto> Motos { get; set; } = [];
+        public ICollection<Moto> Motos { get; set; } = new List<Moto>();
     }
 }

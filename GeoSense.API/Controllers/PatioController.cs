@@ -7,6 +7,7 @@ using GeoSense.API.Services;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using Swashbuckle.AspNetCore.Filters;
+using System.Linq;
 
 namespace GeoSense.API.Controllers
 {
@@ -74,7 +75,7 @@ namespace GeoSense.API.Controllers
             {
                 Id = patio.Id,
                 Nome = patio.Nome,
-                Vagas = [.. patio.Vagas.Select(v => _mapper.Map<VagaDTO>(v))]
+                Vagas = patio.Vagas?.Select(v => _mapper.Map<VagaDTO>(v)).ToList() ?? new List<VagaDTO>()
             };
 
             return Ok(dto);

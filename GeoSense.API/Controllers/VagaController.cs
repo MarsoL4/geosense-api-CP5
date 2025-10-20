@@ -92,9 +92,11 @@ namespace GeoSense.API.Controllers
             if (vagaExistente)
                 return BadRequest(new { mensagem = "Já existe uma vaga com esse número neste pátio." });
 
-            var novaVaga = new GeoSense.API.Infrastructure.Persistence.Vaga(dto.Numero, dto.PatioId);
-            novaVaga.GetType().GetProperty("Tipo")?.SetValue(novaVaga, (TipoVaga)dto.Tipo);
-            novaVaga.GetType().GetProperty("Status")?.SetValue(novaVaga, (StatusVaga)dto.Status);
+            var novaVaga = new GeoSense.API.Infrastructure.Persistence.Vaga(dto.Numero, dto.PatioId)
+            {
+                Tipo = (TipoVaga)dto.Tipo,
+                Status = (StatusVaga)dto.Status
+            };
 
             await _service.AdicionarAsync(novaVaga);
 
@@ -136,10 +138,11 @@ namespace GeoSense.API.Controllers
             if (vagaExistente)
                 return BadRequest(new { mensagem = "Já existe uma vaga com esse número neste pátio." });
 
-            vaga.GetType().GetProperty("Numero")?.SetValue(vaga, dto.Numero);
-            vaga.GetType().GetProperty("Tipo")?.SetValue(vaga, (TipoVaga)dto.Tipo);
-            vaga.GetType().GetProperty("Status")?.SetValue(vaga, (StatusVaga)dto.Status);
-            vaga.GetType().GetProperty("PatioId")?.SetValue(vaga, dto.PatioId);
+            // Atribuições diretas (evita reflection)
+            vaga.Numero = dto.Numero;
+            vaga.Tipo = (TipoVaga)dto.Tipo;
+            vaga.Status = (StatusVaga)dto.Status;
+            vaga.PatioId = dto.PatioId;
 
             await _service.AtualizarAsync(vaga);
 

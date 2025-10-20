@@ -12,6 +12,6 @@
         /// <summary>
         /// Vagas disponíveis neste pátio.
         /// </summary>
-        public ICollection<Vaga> Vagas { get; set; } = [];
+        public ICollection<Vaga> Vagas { get; set; } = new List<Vaga>();
     }
 }
