@@ -1,13 +1,20 @@
-﻿using GeoSense.API.Infrastructure.Contexts;
+﻿using GeoSense.API.Domain.Repositories;
+using GeoSense.API.Infrastructure.Contexts;
 using GeoSense.API.Infrastructure.Persistence;
-using GeoSense.API.Infrastructure.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace GeoSense.API.Infrastructure.Repositories
 {
-    public class VagaRepository(GeoSenseContext context) : IVagaRepository
+    public class VagaRepository : IVagaRepository
     {
-        private readonly GeoSenseContext _context = context;
+        private readonly GeoSenseContext _context;
+
+        public VagaRepository(GeoSenseContext context)
+        {
+            _context = context;
+        }
 
         public async Task<List<Vaga>> ObterTodasAsync()
         {

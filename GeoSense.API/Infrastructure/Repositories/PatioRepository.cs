@@ -1,13 +1,20 @@
-﻿using GeoSense.API.Infrastructure.Contexts;
+﻿using GeoSense.API.Domain.Repositories;
+using GeoSense.API.Infrastructure.Contexts;
 using GeoSense.API.Infrastructure.Persistence;
-using GeoSense.API.Infrastructure.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace GeoSense.API.Infrastructure.Repositories
 {
-    public class PatioRepository(GeoSenseContext context) : IPatioRepository
+    public class PatioRepository : IPatioRepository
     {
-        private readonly GeoSenseContext _context = context;
+        private readonly GeoSenseContext _context;
+
+        public PatioRepository(GeoSenseContext context)
+        {
+            _context = context;
+        }
 
         public async Task<List<Patio>> ObterTodasAsync()
         {
