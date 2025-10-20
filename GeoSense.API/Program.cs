@@ -2,6 +2,7 @@
 using FluentValidation.AspNetCore;
 using GeoSense.API.AutoMapper;
 using GeoSense.API.Domain.Repositories;
+using GeoSense.API.Infrastructure.Adapters;
 using GeoSense.API.Infrastructure.Contexts;
 using GeoSense.API.Infrastructure.Mongo;
 using GeoSense.API.Infrastructure.Repositories;
@@ -72,6 +73,11 @@ namespace GeoSense.API
             builder.Services.AddScoped<VagaMongoRepository>();
             builder.Services.AddScoped<MotoMongoRepository>();
             builder.Services.AddScoped<UsuarioMongoRepository>();
+
+            // ------------------------------
+            // Register aggregate adapter (Domain -> Infrastructure)
+            // ------------------------------
+            builder.Services.AddScoped<IVagaAggregateRepository, VagaAggregateMongoRepository>();
 
             // ------------------------------
             // Health checks
