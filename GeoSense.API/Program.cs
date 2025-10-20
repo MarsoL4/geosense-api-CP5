@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.OpenApi.Models;
 using MongoDB.Driver;
 using Swashbuckle.AspNetCore.Filters;
@@ -27,7 +28,9 @@ namespace GeoSense.API
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Services / DI - Application services
+            // ------------------------------
+            // Application services / DI
+            // ------------------------------
             builder.Services.AddScoped<MotoService>();
             builder.Services.AddScoped<VagaService>();
             builder.Services.AddScoped<PatioService>();
@@ -36,12 +39,16 @@ namespace GeoSense.API
 
             builder.Services.AddAutoMapper(typeof(MappingProfile));
 
-            // DbContext (EF/Oracle)
-            var connectionString = builder.Configuration.GetConnectionString("Oracle");
+            // ------------------------------
+            // Persistence: EF / DbContext
+            // ------------------------------
+            var oracleConnection = builder.Configuration.GetConnectionString("Oracle");
             builder.Services.AddDbContext<GeoSenseContext>(options =>
-                options.UseOracle(connectionString));
+                options.UseOracle(oracleConnection));
 
-            // MongoDB
+            // ------------------------------
+            // MongoDB: settings + client
+            // ------------------------------
             builder.Services.Configure<MongoSettings>(builder.Configuration.GetSection("MongoSettings"));
             var mongoSettings = builder.Configuration.GetSection("MongoSettings").Get<MongoSettings>() ?? new MongoSettings
             {
@@ -52,30 +59,38 @@ namespace GeoSense.API
             builder.Services.AddSingleton(mongoSettings);
             builder.Services.AddSingleton<IMongoClient>(sp => new MongoClient(mongoSettings.ConnectionString));
 
-            // Infrastructure implementations (EF) registered against Domain interfaces
+            // ------------------------------
+            // Repositories: register implementations against Domain contracts
+            // ------------------------------
+            // EF implementations (primary)
             builder.Services.AddScoped<IMotoRepository, MotoRepository>();
             builder.Services.AddScoped<IVagaRepository, VagaRepository>();
             builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
-
-            // Patio: mantido com a interface em Infrastructure (pode migrar depois)
             builder.Services.AddScoped<IPatioRepository, PatioRepository>();
 
-            // Repositorios Mongo (implementações concretas para v2)
+            // Mongo concrete repositories (used by v2 controllers) - concrete types
             builder.Services.AddScoped<VagaMongoRepository>();
             builder.Services.AddScoped<MotoMongoRepository>();
             builder.Services.AddScoped<UsuarioMongoRepository>();
 
-            // HealthCheck
+            // ------------------------------
+            // Health checks
+            // ------------------------------
             builder.Services.AddScoped<MongoHealthCheck>();
             builder.Services.AddHealthChecks()
                 .AddDbContextCheck<GeoSenseContext>("Database")
                 .AddCheck<MongoHealthCheck>("MongoDB");
 
+            // ------------------------------
             // FluentValidation
+            // ------------------------------
             builder.Services.AddFluentValidationAutoValidation();
+            // Registers validators from the assembly that contains MotoDTOValidator (and other validators)
             builder.Services.AddValidatorsFromAssemblyContaining<MotoDTOValidator>();
 
+            // ------------------------------
             // API Versioning
+            // ------------------------------
             builder.Services.AddApiVersioning(options =>
             {
                 options.DefaultApiVersion = new ApiVersion(1, 0);
@@ -83,25 +98,31 @@ namespace GeoSense.API
                 options.ReportApiVersions = true;
                 options.ApiVersionReader = new UrlSegmentApiVersionReader();
             });
+
             builder.Services.AddVersionedApiExplorer(options =>
             {
                 options.GroupNameFormat = "'v'VVV";
                 options.SubstituteApiVersionInUrl = true;
             });
 
+            // ------------------------------
+            // Controllers / JSON options
+            // ------------------------------
             builder.Services.AddControllers()
-                .AddJsonOptions(options =>
+                .AddJsonOptions(opts =>
                 {
-                    options.JsonSerializerOptions.WriteIndented = true;
+                    opts.JsonSerializerOptions.WriteIndented = true;
                 });
 
             builder.Services.AddEndpointsApiExplorer();
 
-            // Swagger
+            // ------------------------------
+            // Swagger / OpenAPI
+            // ------------------------------
             builder.Services.AddSwaggerGen(options =>
             {
                 var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-                options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename), true);
+                options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename), includeControllerXmlComments: true);
 
                 options.SwaggerDoc("v1", new OpenApiInfo
                 {
@@ -119,6 +140,7 @@ namespace GeoSense.API
 
                 options.ExampleFilters();
 
+                // Include controllers based on ApiVersion attribute
                 options.DocInclusionPredicate((docName, apiDesc) =>
                 {
                     if (!apiDesc.TryGetMethodInfo(out var methodInfo)) return false;
@@ -136,6 +158,9 @@ namespace GeoSense.API
 
             builder.Services.AddSwaggerExamplesFromAssemblyOf<Program>();
 
+            // ------------------------------
+            // Build / Middleware
+            // ------------------------------
             var app = builder.Build();
 
             var provider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
@@ -153,8 +178,10 @@ namespace GeoSense.API
             app.UseAuthorization();
             app.MapControllers();
 
+            // Cached JSON options for health response
             var cachedJsonSerializerOptions = new JsonSerializerOptions { WriteIndented = true };
 
+            // Health endpoint with structured JSON response
             app.MapHealthChecks("/health", new HealthCheckOptions
             {
                 ResponseWriter = async (context, report) =>
@@ -170,7 +197,9 @@ namespace GeoSense.API
                                 e => new
                                 {
                                     status = e.Value.Status.ToString(),
+                                    description = e.Value.Description,
                                     duration = e.Value.Duration.ToString(),
+                                    exception = e.Value.Exception?.Message,
                                     tags = e.Value.Tags
                                 }
                             )
