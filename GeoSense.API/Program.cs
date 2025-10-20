@@ -13,6 +13,8 @@ using Swashbuckle.AspNetCore.Filters;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Reflection;
 using System.Text.Json;
+using MongoDB.Driver;
+using GeoSense.API.Infrastructure.Mongo;
 
 namespace GeoSense.API
 {
@@ -22,6 +24,7 @@ namespace GeoSense.API
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            // Services / DI - Application services and repositories (EF)
             builder.Services.AddScoped<MotoService>();
             builder.Services.AddScoped<IMotoRepository, MotoRepository>();
 
@@ -41,6 +44,28 @@ namespace GeoSense.API
             var connectionString = builder.Configuration.GetConnectionString("Oracle");
             builder.Services.AddDbContext<GeoSenseContext>(options =>
                 options.UseOracle(connectionString));
+
+            // --- MongoDB: configuração do cliente e settings ---
+            // Lê seção "MongoSettings" do appsettings.json para injeção e cria um IMongoClient singleton.
+            builder.Services.Configure<MongoSettings>(builder.Configuration.GetSection("MongoSettings"));
+            var mongoSettings = builder.Configuration.GetSection("MongoSettings").Get<MongoSettings>() ?? new MongoSettings
+            {
+                ConnectionString = builder.Configuration.GetConnectionString("Mongo") ?? "mongodb://localhost:27017",
+                DatabaseName = "geosense"
+            };
+
+            // Registra a instância de MongoSettings para uso em repositórios/healthchecks
+            builder.Services.AddSingleton(mongoSettings);
+
+            // Registra o IMongoClient como singleton
+            builder.Services.AddSingleton<IMongoClient>(sp =>
+            {
+                var cs = mongoSettings.ConnectionString;
+                return new MongoClient(cs);
+            });
+
+            // Registra o MongoHealthCheck para ser usado pelo AddHealthChecks()
+            builder.Services.AddScoped<MongoHealthCheck>();
 
             // Versionamento de API
             builder.Services.AddApiVersioning(options =>
@@ -65,9 +90,10 @@ namespace GeoSense.API
 
             builder.Services.AddEndpointsApiExplorer();
 
-            // Adiciona Health Checks
+            // Adiciona Health Checks (EF + Mongo)
             builder.Services.AddHealthChecks()
-                .AddDbContextCheck<GeoSenseContext>("Database");
+                .AddDbContextCheck<GeoSenseContext>("Database")
+                .AddCheck<MongoHealthCheck>("MongoDB");
 
             // Adiciona SwaggerGen depois do VersionedApiExplorer
             builder.Services.AddSwaggerGen(options =>
@@ -102,7 +128,6 @@ namespace GeoSense.API
 
             var app = builder.Build();
 
-            // GARANTA que o provider é resolvido AQUI antes do UseSwagger
             var provider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
 
             app.UseSwagger();
