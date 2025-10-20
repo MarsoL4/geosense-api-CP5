@@ -46,7 +46,6 @@ namespace GeoSense.API
                 options.UseOracle(connectionString));
 
             // --- MongoDB: configuração do cliente e settings ---
-            // Lê seção "MongoSettings" do appsettings.json para injeção e cria um IMongoClient singleton.
             builder.Services.Configure<MongoSettings>(builder.Configuration.GetSection("MongoSettings"));
             var mongoSettings = builder.Configuration.GetSection("MongoSettings").Get<MongoSettings>() ?? new MongoSettings
             {
@@ -54,15 +53,11 @@ namespace GeoSense.API
                 DatabaseName = "geosense"
             };
 
-            // Registra a instância de MongoSettings para uso em repositórios/healthchecks
             builder.Services.AddSingleton(mongoSettings);
+            builder.Services.AddSingleton<IMongoClient>(sp => new MongoClient(mongoSettings.ConnectionString));
 
-            // Registra o IMongoClient como singleton
-            builder.Services.AddSingleton<IMongoClient>(sp =>
-            {
-                var cs = mongoSettings.ConnectionString;
-                return new MongoClient(cs);
-            });
+            // Registra repositório Mongo concreto (não substitui o repositório EF)
+            builder.Services.AddScoped<VagaMongoRepository>();
 
             // Registra o MongoHealthCheck para ser usado pelo AddHealthChecks()
             builder.Services.AddScoped<MongoHealthCheck>();
@@ -101,16 +96,24 @@ namespace GeoSense.API
                 var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
                 options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename), true);
 
+                // Documentos Swagger para v1 e v2
                 options.SwaggerDoc("v1", new OpenApiInfo
                 {
                     Title = "GeoSense API",
                     Version = "v1",
-                    Description = "API RESTful para gerenciamento de Motos, Vagas, Pátios e Usuários. Endpoints CRUD, paginação, HATEOAS e exemplos de payload."
+                    Description = "GeoSense API v1 - Endpoints base (EF/Oracle)"
+                });
+
+                options.SwaggerDoc("v2", new OpenApiInfo
+                {
+                    Title = "GeoSense API",
+                    Version = "v2",
+                    Description = "GeoSense API v2 - Endpoints com integração MongoDB (ex.: Vaga v2)"
                 });
 
                 options.ExampleFilters();
 
-                // Versionamento do Swagger
+                // Versionamento do Swagger: mantém a predicate original
                 options.DocInclusionPredicate((docName, apiDesc) =>
                 {
                     if (!apiDesc.TryGetMethodInfo(out var methodInfo)) return false;
@@ -122,6 +125,8 @@ namespace GeoSense.API
 
                     return versions?.Any(v => $"v{v}" == docName) ?? false;
                 });
+
+                options.EnableAnnotations();
             });
 
             builder.Services.AddSwaggerExamplesFromAssemblyOf<Program>();
