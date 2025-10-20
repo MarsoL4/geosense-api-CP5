@@ -15,6 +15,9 @@ using System.Reflection;
 using System.Text.Json;
 using MongoDB.Driver;
 using GeoSense.API.Infrastructure.Mongo;
+using FluentValidation.AspNetCore;
+using GeoSense.API.Validators;
+using FluentValidation;
 
 namespace GeoSense.API
 {
@@ -56,11 +59,18 @@ namespace GeoSense.API
             builder.Services.AddSingleton(mongoSettings);
             builder.Services.AddSingleton<IMongoClient>(sp => new MongoClient(mongoSettings.ConnectionString));
 
-            // Registra repositório Mongo concreto (não substitui o repositório EF)
+            // Registra repositórios Mongo concretos (não substituem os repositórios EF)
             builder.Services.AddScoped<VagaMongoRepository>();
+            builder.Services.AddScoped<MotoMongoRepository>();
+            builder.Services.AddScoped<UsuarioMongoRepository>();
 
             // Registra o MongoHealthCheck para ser usado pelo AddHealthChecks()
             builder.Services.AddScoped<MongoHealthCheck>();
+
+            // -------- FluentValidation --------
+            // Registra validação automática e registra validators da assembly
+            builder.Services.AddFluentValidationAutoValidation();
+            builder.Services.AddValidatorsFromAssemblyContaining<MotoDTOValidator>();
 
             // Versionamento de API
             builder.Services.AddApiVersioning(options =>
@@ -108,7 +118,7 @@ namespace GeoSense.API
                 {
                     Title = "GeoSense API",
                     Version = "v2",
-                    Description = "GeoSense API v2 - Endpoints com integração MongoDB (ex.: Vaga v2)"
+                    Description = "GeoSense API v2 - Endpoints com integração MongoDB (ex.: Vaga, Moto, Usuario v2)"
                 });
 
                 options.ExampleFilters();
