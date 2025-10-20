@@ -1,23 +1,23 @@
-﻿using GeoSense.API.AutoMapper;
+﻿using FluentValidation;
+using FluentValidation.AspNetCore;
+using GeoSense.API.AutoMapper;
+using GeoSense.API.Domain.Repositories;
 using GeoSense.API.Infrastructure.Contexts;
+using GeoSense.API.Infrastructure.Mongo;
 using GeoSense.API.Infrastructure.Repositories;
-using GeoSense.API.Infrastructure.Repositories.Interfaces;
 using GeoSense.API.Services;
+using GeoSense.API.Validators;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using MongoDB.Driver;
 using Swashbuckle.AspNetCore.Filters;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Reflection;
 using System.Text.Json;
-using MongoDB.Driver;
-using GeoSense.API.Infrastructure.Mongo;
-using FluentValidation.AspNetCore;
-using GeoSense.API.Validators;
-using FluentValidation;
 
 namespace GeoSense.API
 {
@@ -27,28 +27,21 @@ namespace GeoSense.API
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Services / DI - Application services and repositories (EF)
+            // Services / DI - Application services
             builder.Services.AddScoped<MotoService>();
-            builder.Services.AddScoped<IMotoRepository, MotoRepository>();
-
             builder.Services.AddScoped<VagaService>();
-            builder.Services.AddScoped<IVagaRepository, VagaRepository>();
-
             builder.Services.AddScoped<PatioService>();
-            builder.Services.AddScoped<IPatioRepository, PatioRepository>();
-
             builder.Services.AddScoped<UsuarioService>();
-            builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
-
             builder.Services.AddScoped<DashboardService>();
 
             builder.Services.AddAutoMapper(typeof(MappingProfile));
 
+            // DbContext (EF/Oracle)
             var connectionString = builder.Configuration.GetConnectionString("Oracle");
             builder.Services.AddDbContext<GeoSenseContext>(options =>
                 options.UseOracle(connectionString));
 
-            // --- MongoDB: configuração do cliente e settings ---
+            // MongoDB
             builder.Services.Configure<MongoSettings>(builder.Configuration.GetSection("MongoSettings"));
             var mongoSettings = builder.Configuration.GetSection("MongoSettings").Get<MongoSettings>() ?? new MongoSettings
             {
@@ -59,20 +52,30 @@ namespace GeoSense.API
             builder.Services.AddSingleton(mongoSettings);
             builder.Services.AddSingleton<IMongoClient>(sp => new MongoClient(mongoSettings.ConnectionString));
 
-            // Registra repositórios Mongo concretos (não substituem os repositórios EF)
+            // Infrastructure implementations (EF) registered against Domain interfaces
+            builder.Services.AddScoped<IMotoRepository, MotoRepository>();
+            builder.Services.AddScoped<IVagaRepository, VagaRepository>();
+            builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
+
+            // Patio: mantido com a interface em Infrastructure (pode migrar depois)
+            builder.Services.AddScoped<IPatioRepository, PatioRepository>();
+
+            // Repositorios Mongo (implementações concretas para v2)
             builder.Services.AddScoped<VagaMongoRepository>();
             builder.Services.AddScoped<MotoMongoRepository>();
             builder.Services.AddScoped<UsuarioMongoRepository>();
 
-            // Registra o MongoHealthCheck para ser usado pelo AddHealthChecks()
+            // HealthCheck
             builder.Services.AddScoped<MongoHealthCheck>();
+            builder.Services.AddHealthChecks()
+                .AddDbContextCheck<GeoSenseContext>("Database")
+                .AddCheck<MongoHealthCheck>("MongoDB");
 
-            // -------- FluentValidation --------
-            // Registra validação automática e registra validators da assembly
+            // FluentValidation
             builder.Services.AddFluentValidationAutoValidation();
             builder.Services.AddValidatorsFromAssemblyContaining<MotoDTOValidator>();
 
-            // Versionamento de API
+            // API Versioning
             builder.Services.AddApiVersioning(options =>
             {
                 options.DefaultApiVersion = new ApiVersion(1, 0);
@@ -80,7 +83,6 @@ namespace GeoSense.API
                 options.ReportApiVersions = true;
                 options.ApiVersionReader = new UrlSegmentApiVersionReader();
             });
-
             builder.Services.AddVersionedApiExplorer(options =>
             {
                 options.GroupNameFormat = "'v'VVV";
@@ -95,18 +97,12 @@ namespace GeoSense.API
 
             builder.Services.AddEndpointsApiExplorer();
 
-            // Adiciona Health Checks (EF + Mongo)
-            builder.Services.AddHealthChecks()
-                .AddDbContextCheck<GeoSenseContext>("Database")
-                .AddCheck<MongoHealthCheck>("MongoDB");
-
-            // Adiciona SwaggerGen depois do VersionedApiExplorer
+            // Swagger
             builder.Services.AddSwaggerGen(options =>
             {
                 var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
                 options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename), true);
 
-                // Documentos Swagger para v1 e v2
                 options.SwaggerDoc("v1", new OpenApiInfo
                 {
                     Title = "GeoSense API",
@@ -118,12 +114,11 @@ namespace GeoSense.API
                 {
                     Title = "GeoSense API",
                     Version = "v2",
-                    Description = "GeoSense API v2 - Endpoints com integração MongoDB (ex.: Vaga, Moto, Usuario v2)"
+                    Description = "GeoSense API v2 - Endpoints com integração MongoDB"
                 });
 
                 options.ExampleFilters();
 
-                // Versionamento do Swagger: mantém a predicate original
                 options.DocInclusionPredicate((docName, apiDesc) =>
                 {
                     if (!apiDesc.TryGetMethodInfo(out var methodInfo)) return false;
@@ -158,10 +153,8 @@ namespace GeoSense.API
             app.UseAuthorization();
             app.MapControllers();
 
-            // Cache the JsonSerializerOptions instance to avoid performance issues (CA1869)
             var cachedJsonSerializerOptions = new JsonSerializerOptions { WriteIndented = true };
 
-            // Endpoint de health check com resposta em JSON estruturado
             app.MapHealthChecks("/health", new HealthCheckOptions
             {
                 ResponseWriter = async (context, report) =>
