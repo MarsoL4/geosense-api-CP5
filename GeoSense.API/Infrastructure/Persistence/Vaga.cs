@@ -9,7 +9,8 @@ namespace GeoSense.API.Infrastructure.Persistence
     /// </summary>
     public class Vaga
     {
-        public long Id { get; private set; }
+        // Tornado public setter para permitir atribuição de Id por implementações de repositório (Mongo)
+        public long Id { get; set; }
 
         public int Numero { get; set; }
         public TipoVaga Tipo { get; set; }

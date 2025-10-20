@@ -6,7 +6,8 @@
     /// </summary>
     public class Patio
     {
-        public long Id { get; private set; }
+        // Tornado public setter para compatibilidade com operações de persistência externas (Mongo)
+        public long Id { get; set; }
         public string Nome { get; set; } = string.Empty;
 
         /// <summary>
