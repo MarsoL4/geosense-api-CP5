@@ -140,14 +140,8 @@ namespace GeoSense.API.Controllers
             if (chassiExiste)
                 return BadRequest(new { mensagem = "Já existe uma moto com esse chassi." });
 
-            var novaMoto = new Moto
-            {
-                Modelo = dto.Modelo,
-                Placa = dto.Placa,
-                Chassi = dto.Chassi,
-                ProblemaIdentificado = dto.ProblemaIdentificado,
-                VagaId = dto.VagaId
-            };
+            // Use AutoMapper to create entity
+            var novaMoto = _mapper.Map<Moto>(dto);
 
             await _service.AdicionarAsync(novaMoto);
 

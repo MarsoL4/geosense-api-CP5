@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using Swashbuckle.AspNetCore.Filters;
 using System.Linq;
+using GeoSense.API.Infrastructure.Persistence;
 
 namespace GeoSense.API.Controllers
 {
@@ -87,7 +88,8 @@ namespace GeoSense.API.Controllers
             if (nomeExistente)
                 return BadRequest(new { mensagem = "Já existe um pátio com esse nome." });
 
-            var novoPatio = new GeoSense.API.Infrastructure.Persistence.Patio { Nome = _dto.Nome };
+            // Use AutoMapper to create entity (avoid direct dependency on persistence types in controller)
+            var novoPatio = _mapper.Map<Patio>(_dto);
             await _service.AdicionarAsync(novoPatio);
 
             var patioCompleto = await _service.ObterPorIdAsync(novoPatio.Id);

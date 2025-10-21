@@ -7,6 +7,7 @@ using GeoSense.API.Services;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using Swashbuckle.AspNetCore.Filters;
+using GeoSense.API.Infrastructure.Persistence;
 
 namespace GeoSense.API.Controllers
 {
@@ -85,7 +86,8 @@ namespace GeoSense.API.Controllers
                 Id = usuario.Id,
                 Nome = usuario.Nome,
                 Email = usuario.Email,
-                Senha = usuario.Senha
+                Senha = usuario.Senha,
+                Tipo = (int)usuario.Tipo
             };
 
             return Ok(dto);
@@ -106,7 +108,8 @@ namespace GeoSense.API.Controllers
             if (emailExiste)
                 return BadRequest(new { mensagem = "Já existe um usuário com esse email." });
 
-            var novoUsuario = new GeoSense.API.Infrastructure.Persistence.Usuario(0, dto.Nome, dto.Email, dto.Senha, (TipoUsuario)dto.Tipo);
+            // Use AutoMapper to create Usuario instance (keeps controller decoupled from persistence)
+            var novoUsuario = _mapper.Map<Usuario>(dto);
             await _service.AdicionarAsync(novoUsuario);
 
             var usuarioCompleto = await _service.ObterPorIdAsync(novoUsuario.Id);

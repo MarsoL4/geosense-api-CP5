@@ -7,6 +7,7 @@ using GeoSense.API.Services;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using Swashbuckle.AspNetCore.Filters;
+using GeoSense.API.Infrastructure.Persistence;
 
 namespace GeoSense.API.Controllers
 {
@@ -80,11 +81,8 @@ namespace GeoSense.API.Controllers
             if (vagaExistente)
                 return BadRequest(new { mensagem = "Já existe uma vaga com esse número neste pátio." });
 
-            var novaVaga = new GeoSense.API.Infrastructure.Persistence.Vaga(dto.Numero, dto.PatioId)
-            {
-                Tipo = (TipoVaga)dto.Tipo,
-                Status = (StatusVaga)dto.Status
-            };
+            // Use AutoMapper to create a Vaga instance
+            var novaVaga = _mapper.Map<Vaga>(dto);
 
             await _service.AdicionarAsync(novaVaga);
 
