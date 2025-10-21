@@ -5,7 +5,8 @@ namespace GeoSense.API.Infrastructure.Mongo
 {
     /// <summary>
     /// Repositório Mongo para Moto (CRUD).
-    /// Estrutura similar ao VagaMongoRepository. Gera Ids via DateTime.UtcNow.Ticks para o escopo do checkpoint.
+    /// Gera Ids usando Unix time em ms (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds())
+    /// para evitar problemas de precisão no JavaScript/Swagger UI.
     /// </summary>
     public class MotoMongoRepository
     {
@@ -32,8 +33,11 @@ namespace GeoSense.API.Infrastructure.Mongo
         {
             if (moto == null) throw new ArgumentNullException(nameof(moto));
 
+            // Gera id seguro para JavaScript/Swagger UI (unix-ms)
             if (moto.Id == 0)
-                moto.Id = DateTime.UtcNow.Ticks;
+            {
+                moto.Id = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            }
 
             await _collection.InsertOneAsync(moto);
             return moto;
@@ -43,8 +47,7 @@ namespace GeoSense.API.Infrastructure.Mongo
         {
             if (moto == null) throw new ArgumentNullException(nameof(moto));
             var filter = Builders<Moto>.Filter.Eq(m => m.Id, moto.Id);
-            var result = await _collection.ReplaceOneAsync(filter, moto);
-            // opcional: checar result.MatchedCount para diagnosticar falhas
+            await _collection.ReplaceOneAsync(filter, moto);
         }
 
         public async Task RemoverAsync(Moto moto)

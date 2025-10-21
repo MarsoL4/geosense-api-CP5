@@ -7,8 +7,8 @@ namespace GeoSense.API.Infrastructure.Mongo
 {
     /// <summary>
     /// Implementação simples de repositório para Vaga usando MongoDB.
-    /// Observação: para geração de Ids aqui utilizamos DateTime.UtcNow.Ticks (long).
-    /// Em produção você pode usar um mecanismo de sequência, ObjectId/string, ou outra estratégia.
+    /// Gera Ids usando Unix time em ms (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds())
+    /// para evitar problemas de precisão no JavaScript/Swagger UI.
     /// </summary>
     public class VagaMongoRepository
     {
@@ -17,7 +17,6 @@ namespace GeoSense.API.Infrastructure.Mongo
         public VagaMongoRepository(IMongoClient client, MongoSettings settings)
         {
             var db = client.GetDatabase(settings.DatabaseName);
-            // Nome da coleção: "vagas"
             _collection = db.GetCollection<Vaga>("vagas");
         }
 
@@ -36,10 +35,10 @@ namespace GeoSense.API.Infrastructure.Mongo
         {
             if (vaga == null) throw new ArgumentNullException(nameof(vaga));
 
-            // Se Id não foi fornecido, gerar com ticks (único o suficiente para checkpoints)
+            // Gera id seguro para JavaScript/Swagger UI (unix-ms)
             if (vaga.Id == 0)
             {
-                vaga.Id = DateTime.UtcNow.Ticks;
+                vaga.Id = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
             }
 
             await _collection.InsertOneAsync(vaga);

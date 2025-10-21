@@ -5,6 +5,7 @@ namespace GeoSense.API.Infrastructure.Mongo
 {
     /// <summary>
     /// Repositório Mongo para Usuario (CRUD + EmailExisteAsync).
+    /// Gera Ids usando Unix time em ms (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()).
     /// </summary>
     public class UsuarioMongoRepository
     {
@@ -32,7 +33,7 @@ namespace GeoSense.API.Infrastructure.Mongo
             if (usuario == null) throw new ArgumentNullException(nameof(usuario));
 
             if (usuario.Id == 0)
-                usuario.Id = DateTime.UtcNow.Ticks;
+                usuario.Id = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
             await _collection.InsertOneAsync(usuario);
             return usuario;
