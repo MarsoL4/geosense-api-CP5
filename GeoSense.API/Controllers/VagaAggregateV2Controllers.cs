@@ -10,6 +10,7 @@ namespace GeoSense.API.Controllers
     [ApiVersion("2.0")]
     [Route("api/v{version:apiVersion}/vaga-aggregate")]
     [ApiController]
+    [Produces("application/json")]
     public class VagaAggregateV2Controller : ControllerBase
     {
         private readonly IVagaAggregateRepository _repo;
@@ -23,7 +24,7 @@ namespace GeoSense.API.Controllers
         /// Aloca uma moto em uma vaga (regra do agregado).
         /// </summary>
         [HttpPost("{id:long}/alocar")]
-        [SwaggerOperation(Summary = "Aloca uma moto em uma vaga (agregado)", Tags = new[] { "VagaAggregate (v2)" })]
+        [SwaggerOperation(Summary = "Alocar moto em vaga (agregado)", Description = "Aloca uma moto em uma vaga usando regras do agregado VagaAggregate.")]
         [SwaggerResponse(204, "Moto alocada com sucesso (agregado)")]
         [SwaggerResponse(400, "Solicitação inválida ou regra de negócio violada")]
         [SwaggerResponse(404, "Vaga ou Moto não encontrado")]
@@ -52,7 +53,7 @@ namespace GeoSense.API.Controllers
         /// Libera a vaga (regra do agregado).
         /// </summary>
         [HttpPost("{id:long}/liberar")]
-        [SwaggerOperation(Summary = "Libera a vaga (agregado)", Tags = new[] { "VagaAggregate (v2)" })]
+        [SwaggerOperation(Summary = "Liberar vaga (agregado)", Description = "Libera a vaga usando regras do agregado VagaAggregate.")]
         [SwaggerResponse(204, "Vaga liberada com sucesso (agregado)")]
         [SwaggerResponse(404, "Vaga não encontrada")]
         public async Task<IActionResult> LiberarVaga(long id)

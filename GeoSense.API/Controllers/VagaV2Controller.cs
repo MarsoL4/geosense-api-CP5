@@ -12,6 +12,7 @@ namespace GeoSense.API.Controllers
     [ApiVersion("2.0")]
     [Route("api/v{version:apiVersion}/vaga")]
     [ApiController]
+    [Produces("application/json")]
     public class VagaV2Controller : ControllerBase
     {
         private readonly VagaMongoRepository _repo;
@@ -27,7 +28,7 @@ namespace GeoSense.API.Controllers
         /// Retorna uma lista paginada de vagas cadastradas (Mongo).
         /// </summary>
         [HttpGet]
-        [SwaggerOperation(Summary = "Lista paginada de vagas (Mongo)", Tags = new[] { "Vaga (v2)" })]
+        [SwaggerOperation(Summary = "Lista paginada de vagas (Mongo)", Description = "Retorna uma página com vagas armazenadas no MongoDB.")]
         [SwaggerResponse(200, "Lista paginada de vagas (Mongo)", typeof(IEnumerable<VagaDTO>))]
         public async Task<ActionResult> GetVagas([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
@@ -54,7 +55,7 @@ namespace GeoSense.API.Controllers
         /// Retorna os dados de uma vaga por ID (Mongo).
         /// </summary>
         [HttpGet("{id:long}")]
-        [SwaggerOperation(Summary = "Retorna os dados de uma vaga por ID (Mongo)", Tags = new[] { "Vaga (v2)" })]
+        [SwaggerOperation(Summary = "Buscar vaga por ID (Mongo)", Description = "Retorna os dados detalhados de uma vaga no MongoDB.")]
         [SwaggerResponse(200, "Vaga encontrada (Mongo)", typeof(VagaDTO))]
         [SwaggerResponse(404, "Vaga não encontrada")]
         public async Task<ActionResult<VagaDTO>> GetVaga(long id)
@@ -70,7 +71,7 @@ namespace GeoSense.API.Controllers
         /// Cadastra uma nova vaga (Mongo).
         /// </summary>
         [HttpPost]
-        [SwaggerOperation(Summary = "Cadastra uma nova vaga (Mongo)", Tags = new[] { "Vaga (v2)" })]
+        [SwaggerOperation(Summary = "Criar vaga (Mongo)", Description = "Cadastra uma nova vaga no MongoDB.")]
         [SwaggerResponse(201, "Vaga criada com sucesso (Mongo)")]
         public async Task<ActionResult> PostVaga(VagaDTO dto)
         {
@@ -102,8 +103,9 @@ namespace GeoSense.API.Controllers
         /// Atualiza os dados de uma vaga existente (Mongo).
         /// </summary>
         [HttpPut("{id:long}")]
-        [SwaggerOperation(Summary = "Atualiza os dados de uma vaga existente (Mongo)", Tags = new[] { "Vaga (v2)" })]
+        [SwaggerOperation(Summary = "Atualizar vaga (Mongo)", Description = "Atualiza os dados de uma vaga armazenada no MongoDB.")]
         [SwaggerResponse(204, "Vaga atualizada com sucesso (Mongo)")]
+        [SwaggerResponse(400, "Vaga duplicada no mesmo pátio")]
         [SwaggerResponse(404, "Vaga não encontrada")]
         public async Task<IActionResult> PutVaga(long id, VagaDTO dto)
         {
@@ -130,7 +132,7 @@ namespace GeoSense.API.Controllers
         /// Exclui uma vaga do sistema (Mongo).
         /// </summary>
         [HttpDelete("{id:long}")]
-        [SwaggerOperation(Summary = "Exclui uma vaga do sistema (Mongo)", Tags = new[] { "Vaga (v2)" })]
+        [SwaggerOperation(Summary = "Remover vaga (Mongo)", Description = "Remove a vaga informada pelo ID no MongoDB.")]
         [SwaggerResponse(204, "Vaga removida com sucesso (Mongo)")]
         [SwaggerResponse(404, "Vaga não encontrada")]
         public async Task<IActionResult> DeleteVaga(long id)

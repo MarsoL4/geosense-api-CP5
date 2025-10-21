@@ -12,6 +12,7 @@ namespace GeoSense.API.Controllers
     [ApiVersion("2.0")]
     [Route("api/v{version:apiVersion}/moto")]
     [ApiController]
+    [Produces("application/json")]
     public class MotoV2Controller : ControllerBase
     {
         private readonly MotoMongoRepository _repo;
@@ -27,7 +28,7 @@ namespace GeoSense.API.Controllers
         /// Retorna uma lista paginada de motos cadastradas (Mongo).
         /// </summary>
         [HttpGet]
-        [SwaggerOperation(Summary = "Lista paginada de motos (Mongo)", Tags = new[] { "Moto (v2)" })]
+        [SwaggerOperation(Summary = "Lista paginada de motos (Mongo)", Description = "Retorna uma página com motos cadastradas no MongoDB.")]
         [SwaggerResponse(200, "Lista paginada de motos (Mongo)", typeof(object))]
         public async Task<ActionResult> GetMotos([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
@@ -54,7 +55,7 @@ namespace GeoSense.API.Controllers
         /// Retorna os dados de uma moto por ID (Mongo).
         /// </summary>
         [HttpGet("{id:long}")]
-        [SwaggerOperation(Summary = "Retorna os dados de uma moto por ID (Mongo)", Tags = new[] { "Moto (v2)" })]
+        [SwaggerOperation(Summary = "Buscar moto por ID (Mongo)", Description = "Retorna os dados detalhados de uma moto no MongoDB por id.")]
         [SwaggerResponse(200, "Moto encontrada (Mongo)", typeof(MotoDetalhesDTO))]
         [SwaggerResponse(404, "Moto não encontrada")]
         public async Task<ActionResult<MotoDetalhesDTO>> GetMoto(long id)
@@ -71,7 +72,7 @@ namespace GeoSense.API.Controllers
         /// Cadastra uma nova moto (Mongo).
         /// </summary>
         [HttpPost]
-        [SwaggerOperation(Summary = "Cadastra uma nova moto (Mongo)", Tags = new[] { "Moto (v2)" })]
+        [SwaggerOperation(Summary = "Criar moto (Mongo)", Description = "Cadastra uma nova moto no MongoDB.")]
         [SwaggerResponse(201, "Moto criada com sucesso (Mongo)")]
         [SwaggerResponse(400, "Alguma restrição de negócio foi violada")]
         public async Task<ActionResult> PostMoto(MotoDTO dto)
@@ -115,7 +116,7 @@ namespace GeoSense.API.Controllers
         /// Atualiza os dados de uma moto existente (Mongo).
         /// </summary>
         [HttpPut("{id:long}")]
-        [SwaggerOperation(Summary = "Atualiza os dados de uma moto existente (Mongo)", Tags = new[] { "Moto (v2)" })]
+        [SwaggerOperation(Summary = "Atualizar moto (Mongo)", Description = "Atualiza os dados de uma moto existente no MongoDB.")]
         [SwaggerResponse(204, "Moto atualizada com sucesso (Mongo)")]
         [SwaggerResponse(400, "Restrição de negócio violada")]
         [SwaggerResponse(404, "Moto não encontrada")]
@@ -154,7 +155,7 @@ namespace GeoSense.API.Controllers
         /// Exclui uma moto do sistema (Mongo).
         /// </summary>
         [HttpDelete("{id:long}")]
-        [SwaggerOperation(Summary = "Exclui uma moto do sistema (Mongo)", Tags = new[] { "Moto (v2)" })]
+        [SwaggerOperation(Summary = "Remover moto (Mongo)", Description = "Remove a moto informada pelo ID no MongoDB.")]
         [SwaggerResponse(204, "Moto removida com sucesso (Mongo)")]
         [SwaggerResponse(404, "Moto não encontrada")]
         public async Task<IActionResult> DeleteMoto(long id)
