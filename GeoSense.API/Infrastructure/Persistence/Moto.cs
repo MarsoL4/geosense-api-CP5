@@ -1,4 +1,7 @@
-﻿namespace GeoSense.API.Infrastructure.Persistence
+﻿using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
+
+namespace GeoSense.API.Infrastructure.Persistence
 {
     /// <summary>
     /// Entidade que representa uma moto cadastrada no sistema.
@@ -6,7 +9,12 @@
     /// </summary>
     public class Moto
     {
+        // Mapeia a propriedade Id para o _id do MongoDB (Int64).
+        // Em EF continua funcionando como propriedade normal long.
+        [BsonId]
+        [BsonRepresentation(BsonType.Int64)]
         public long Id { get; set; }
+
         public required string Modelo { get; set; }
         public required string Placa { get; set; }
         public required string Chassi { get; set; }

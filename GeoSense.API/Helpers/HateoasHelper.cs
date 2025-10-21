@@ -9,10 +9,11 @@ namespace GeoSense.API.Helpers
         public static List<LinkDTO> GetPagedLinks(IUrlHelper url, string resource, int page, int pageSize, int totalCount)
         {
             // resource normalmente recebido como "Motos", "Vagas", "Patios", "Usuarios"
-            // controllerName assumido como singular (removendo 's' final quando aplicável)
-            var controllerName = resource;
+            // Queremos formar um controllerName compatível com o nome real do controller
+            // (p.ex. "Moto" ou "MotoV2") — mantemos um nome base (singular) para as ações padrão.
+            var controllerBase = resource;
             if (resource.EndsWith("s") && resource.Length > 1)
-                controllerName = resource.Substring(0, resource.Length - 1);
+                controllerBase = resource.Substring(0, resource.Length - 1);
 
             // actionName esperado: "Get" + resource (ex: GetMotos)
             var actionName = "Get" + resource;
@@ -23,7 +24,8 @@ namespace GeoSense.API.Helpers
                 {
                     Rel = "self",
                     Method = "GET",
-                    Href = url.Action(actionName, controllerName, new { page, pageSize }) ?? string.Empty
+                    // Tenta gerar a URL usando controllerBase; se Action não for encontrada, url.Action retorna null.
+                    Href = url.Action(actionName, controllerBase, new { page, pageSize }) ?? string.Empty
                 }
             };
 
@@ -35,7 +37,7 @@ namespace GeoSense.API.Helpers
                 {
                     Rel = "prev",
                     Method = "GET",
-                    Href = url.Action(actionName, controllerName, new { page = page - 1, pageSize }) ?? string.Empty
+                    Href = url.Action(actionName, controllerBase, new { page = page - 1, pageSize }) ?? string.Empty
                 });
             }
 
@@ -45,7 +47,7 @@ namespace GeoSense.API.Helpers
                 {
                     Rel = "next",
                     Method = "GET",
-                    Href = url.Action(actionName, controllerName, new { page = page + 1, pageSize }) ?? string.Empty
+                    Href = url.Action(actionName, controllerBase, new { page = page + 1, pageSize }) ?? string.Empty
                 });
             }
 

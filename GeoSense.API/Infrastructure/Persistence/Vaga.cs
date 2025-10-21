@@ -1,4 +1,5 @@
-﻿using GeoSense.API.Domain;
+﻿using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 using GeoSense.API.Domain.Enums;
 
 namespace GeoSense.API.Infrastructure.Persistence
@@ -9,7 +10,9 @@ namespace GeoSense.API.Infrastructure.Persistence
     /// </summary>
     public class Vaga
     {
-        // Tornado public setter para permitir atribuição de Id por implementações de repositório (Mongo)
+        // Mapeia a propriedade Id para o _id do MongoDB (Int64).
+        [BsonId]
+        [BsonRepresentation(BsonType.Int64)]
         public long Id { get; set; }
 
         public int Numero { get; set; }
