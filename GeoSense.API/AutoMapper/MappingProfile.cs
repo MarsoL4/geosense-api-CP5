@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using System.Linq;
+using AutoMapper;
 using GeoSense.API.Infrastructure.Persistence;
 using GeoSense.API.Domain.Enums;
 using GeoSense.API.DTOs.Moto;
@@ -26,7 +27,8 @@ namespace GeoSense.API.AutoMapper
                 .ForMember(dest => dest.Tipo, opt => opt.MapFrom(src => (int)src.Tipo))
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => (int)src.Status))
                 .ForMember(dest => dest.PatioId, opt => opt.MapFrom(src => src.PatioId))
-                .ForMember(dest => dest.MotoId, opt => opt.MapFrom(src => src.Motos.FirstOrDefault() != null ? (long?)src.Motos.FirstOrDefault()!.Id : null)); // Pega a moto alocada, se houver
+                // Mapa o Id da primeira moto (se houver) para MotoId como long?
+                .ForMember(dest => dest.MotoId, opt => opt.MapFrom(src => src.Motos.Select(m => (long?)m.Id).FirstOrDefault()));
 
             CreateMap<Patio, PatioDTO>()
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
