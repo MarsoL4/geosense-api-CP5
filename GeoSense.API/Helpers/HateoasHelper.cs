@@ -9,14 +9,28 @@ namespace GeoSense.API.Helpers
         public static List<LinkDTO> GetPagedLinks(IUrlHelper url, string resource, int page, int pageSize, int totalCount)
         {
             // resource normalmente recebido como "Motos", "Vagas", "Patios", "Usuarios"
-            // Queremos formar um controllerName compatível com o nome real do controller
-            // (p.ex. "Moto" ou "MotoV2") — mantemos um nome base (singular) para as ações padrão.
             var controllerBase = resource;
             if (resource.EndsWith("s") && resource.Length > 1)
                 controllerBase = resource.Substring(0, resource.Length - 1);
 
-            // actionName esperado: "Get" + resource (ex: GetMotos)
             var actionName = "Get" + resource;
+
+            // Tenta gerar via IUrlHelper (respeita versionamento e rotas)
+            string? hrefSelf = null;
+            try
+            {
+                // tenta incluir version se estiver disponível no RouteData
+                var version = url.ActionContext.RouteData.Values["version"]?.ToString();
+                hrefSelf = url.Action(actionName, controllerBase, new { page, pageSize, version });
+            }
+            catch
+            {
+                hrefSelf = null;
+            }
+
+            // fallback: monta URL manualmente (usa versão encontrada no RouteData ou v1 por padrão)
+            var routeVersion = url.ActionContext.RouteData.Values["version"]?.ToString() ?? "1";
+            var fallbackBase = $"/api/v{routeVersion}/{controllerBase.ToLowerInvariant()}";
 
             var links = new List<LinkDTO>
             {
@@ -24,8 +38,7 @@ namespace GeoSense.API.Helpers
                 {
                     Rel = "self",
                     Method = "GET",
-                    // Tenta gerar a URL usando controllerBase; se Action não for encontrada, url.Action retorna null.
-                    Href = url.Action(actionName, controllerBase, new { page, pageSize }) ?? string.Empty
+                    Href = hrefSelf ?? $"{fallbackBase}?page={page}&pageSize={pageSize}"
                 }
             };
 
@@ -37,7 +50,7 @@ namespace GeoSense.API.Helpers
                 {
                     Rel = "prev",
                     Method = "GET",
-                    Href = url.Action(actionName, controllerBase, new { page = page - 1, pageSize }) ?? string.Empty
+                    Href = hrefSelf != null ? url.Action(actionName, controllerBase, new { page = page - 1, pageSize }) ?? string.Empty : $"{fallbackBase}?page={page - 1}&pageSize={pageSize}"
                 });
             }
 
@@ -47,7 +60,7 @@ namespace GeoSense.API.Helpers
                 {
                     Rel = "next",
                     Method = "GET",
-                    Href = url.Action(actionName, controllerBase, new { page = page + 1, pageSize }) ?? string.Empty
+                    Href = hrefSelf != null ? url.Action(actionName, controllerBase, new { page = page + 1, pageSize }) ?? string.Empty : $"{fallbackBase}?page={page + 1}&pageSize={pageSize}"
                 });
             }
 

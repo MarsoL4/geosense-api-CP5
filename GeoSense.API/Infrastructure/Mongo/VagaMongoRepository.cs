@@ -23,12 +23,13 @@ namespace GeoSense.API.Infrastructure.Mongo
 
         public async Task<List<Vaga>> ObterTodasAsync()
         {
-            return await _collection.Find(_ => true).ToListAsync();
+            return await _collection.Find(FilterDefinition<Vaga>.Empty).ToListAsync();
         }
 
         public async Task<Vaga?> ObterPorIdAsync(long id)
         {
-            return await _collection.Find(v => v.Id == id).FirstOrDefaultAsync();
+            var filter = Builders<Vaga>.Filter.Eq(v => v.Id, id);
+            return await _collection.Find(filter).FirstOrDefaultAsync();
         }
 
         public async Task<Vaga> AdicionarAsync(Vaga vaga)
@@ -48,13 +49,15 @@ namespace GeoSense.API.Infrastructure.Mongo
         public async Task AtualizarAsync(Vaga vaga)
         {
             if (vaga == null) throw new ArgumentNullException(nameof(vaga));
-            await _collection.ReplaceOneAsync(v => v.Id == vaga.Id, vaga);
+            var filter = Builders<Vaga>.Filter.Eq(v => v.Id, vaga.Id);
+            await _collection.ReplaceOneAsync(filter, vaga);
         }
 
         public async Task RemoverAsync(Vaga vaga)
         {
             if (vaga == null) throw new ArgumentNullException(nameof(vaga));
-            await _collection.DeleteOneAsync(v => v.Id == vaga.Id);
+            var filter = Builders<Vaga>.Filter.Eq(v => v.Id, vaga.Id);
+            await _collection.DeleteOneAsync(filter);
         }
     }
 }

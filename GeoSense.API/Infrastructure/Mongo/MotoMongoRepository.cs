@@ -19,12 +19,13 @@ namespace GeoSense.API.Infrastructure.Mongo
 
         public async Task<List<Moto>> ObterTodasAsync()
         {
-            return await _collection.Find(_ => true).ToListAsync();
+            return await _collection.Find(FilterDefinition<Moto>.Empty).ToListAsync();
         }
 
         public async Task<Moto?> ObterPorIdAsync(long id)
         {
-            return await _collection.Find(m => m.Id == id).FirstOrDefaultAsync();
+            var filter = Builders<Moto>.Filter.Eq(m => m.Id, id);
+            return await _collection.Find(filter).FirstOrDefaultAsync();
         }
 
         public async Task<Moto> AdicionarAsync(Moto moto)
@@ -41,13 +42,16 @@ namespace GeoSense.API.Infrastructure.Mongo
         public async Task AtualizarAsync(Moto moto)
         {
             if (moto == null) throw new ArgumentNullException(nameof(moto));
-            await _collection.ReplaceOneAsync(m => m.Id == moto.Id, moto);
+            var filter = Builders<Moto>.Filter.Eq(m => m.Id, moto.Id);
+            var result = await _collection.ReplaceOneAsync(filter, moto);
+            // opcional: checar result.MatchedCount para diagnosticar falhas
         }
 
         public async Task RemoverAsync(Moto moto)
         {
             if (moto == null) throw new ArgumentNullException(nameof(moto));
-            await _collection.DeleteOneAsync(m => m.Id == moto.Id);
+            var filter = Builders<Moto>.Filter.Eq(m => m.Id, moto.Id);
+            await _collection.DeleteOneAsync(filter);
         }
     }
 }
