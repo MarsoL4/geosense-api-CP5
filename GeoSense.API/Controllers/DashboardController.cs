@@ -7,6 +7,7 @@ namespace GeoSense.API.Controllers
     [ApiVersion("1.0")]
     [Route("api/v{version:apiVersion}/[controller]")]
     [ApiController]
+    [Produces("application/json")]
     public class DashboardController(DashboardService service) : ControllerBase
     {
         private readonly DashboardService _service = service;
@@ -17,9 +18,9 @@ namespace GeoSense.API.Controllers
         /// <remarks>
         /// Retorna informações resumidas sobre o sistema, incluindo total de motos, motos com problema, vagas livres e ocupadas.
         /// </remarks>
-        /// <response code="200">Dados agregados para o dashboard</response>
         [HttpGet]
-        [SwaggerResponse(200, "Dados agregados para o dashboard")]
+        [SwaggerOperation(Summary = "Dados agregados do dashboard", Description = "Retorna métricas agregadas úteis para o dashboard administrativo.")]
+        [SwaggerResponse(200, "Dados agregados para o dashboard", typeof(object))]
         public async Task<IActionResult> GetDashboardData()
         {
             var resultado = await _service.ObterDashboardDataAsync();

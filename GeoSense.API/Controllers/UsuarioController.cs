@@ -13,6 +13,7 @@ namespace GeoSense.API.Controllers
     [ApiVersion("1.0")]
     [Route("api/v{version:apiVersion}/[controller]")]
     [ApiController]
+    [Produces("application/json")]
     public class UsuarioController(UsuarioService service, IMapper mapper) : ControllerBase
     {
         private readonly UsuarioService _service = service;
@@ -21,10 +22,8 @@ namespace GeoSense.API.Controllers
         /// <summary>
         /// Retorna uma lista paginada de usuários cadastrados.
         /// </summary>
-        /// <param name="page">Número da página (padrão: 1)</param>
-        /// <param name="pageSize">Quantidade de itens por página (padrão: 10)</param>
-        /// <response code="200">Lista paginada de usuários</response>
         [HttpGet]
+        [SwaggerOperation(Summary = "Lista paginada de usuários", Description = "Retorna uma página com usuários cadastrados.")]
         [SwaggerResponse(200, "Lista paginada de usuários cadastrados", typeof(PagedHateoasDTO<UsuarioDTO>))]
         public async Task<ActionResult<PagedHateoasDTO<UsuarioDTO>>> GetUsuarios([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
@@ -50,10 +49,8 @@ namespace GeoSense.API.Controllers
         /// <summary>
         /// Retorna os dados de um usuário por ID.
         /// </summary>
-        /// <param name="id">Identificador único do usuário</param>
-        /// <response code="200">Usuário encontrado</response>
-        /// <response code="404">Usuário não encontrado</response>
         [HttpGet("{id:long}")]
+        [SwaggerOperation(Summary = "Buscar usuário por ID", Description = "Retorna os dados de um usuário a partir do seu identificador.")]
         [SwaggerResponse(200, "Usuário encontrado", typeof(UsuarioDTO))]
         [SwaggerResponse(404, "Usuário não encontrado")]
         public async Task<ActionResult<UsuarioDTO>> GetUsuario(long id)
@@ -70,10 +67,8 @@ namespace GeoSense.API.Controllers
         /// <summary>
         /// Retorna os dados de um usuário por email.
         /// </summary>
-        /// <param name="email">E-mail do usuário</param>
-        /// <response code="200">Usuário encontrado</response>
-        /// <response code="404">Usuário não encontrado</response>
         [HttpGet("{email}")]
+        [SwaggerOperation(Summary = "Buscar usuário por email", Description = "Busca usuário pelo email (único).")]
         [SwaggerResponse(200, "Usuário encontrado por email", typeof(UsuarioDTO))]
         [SwaggerResponse(404, "Usuário não encontrado")]
         public async Task<ActionResult<UsuarioDTO>> GetUsuarioPorEmail(string email)
@@ -99,10 +94,8 @@ namespace GeoSense.API.Controllers
         /// <summary>
         /// Cadastra um novo usuário.
         /// </summary>
-        /// <param name="dto">Dados do novo usuário</param>
-        /// <response code="201">Usuário criado com sucesso</response>
-        /// <response code="400">Email já cadastrado</response>
         [HttpPost]
+        [SwaggerOperation(Summary = "Criar usuário", Description = "Cadastra um novo usuário no sistema.")]
         [SwaggerRequestExample(typeof(UsuarioDTO), typeof(GeoSense.API.Examples.UsuarioDTOExample))]
         [SwaggerResponse(201, "Usuário criado com sucesso", typeof(object))]
         [SwaggerResponse(400, "Email já cadastrado")]
@@ -129,12 +122,8 @@ namespace GeoSense.API.Controllers
         /// <summary>
         /// Atualiza os dados de um usuário existente.
         /// </summary>
-        /// <param name="id">Identificador único do usuário</param>
-        /// <param name="dto">Dados do usuário a serem atualizados</param>
-        /// <response code="204">Usuário atualizado com sucesso (No Content)</response>
-        /// <response code="400">Email já cadastrado</response>
-        /// <response code="404">Usuário não encontrado</response>
         [HttpPut("{id}")]
+        [SwaggerOperation(Summary = "Atualizar usuário", Description = "Atualiza os dados de um usuário existente.")]
         [SwaggerRequestExample(typeof(UsuarioDTO), typeof(GeoSense.API.Examples.UsuarioDTOExample))]
         [SwaggerResponse(204, "Usuário atualizado com sucesso (No Content)")]
         [SwaggerResponse(400, "Email já cadastrado")]
@@ -163,10 +152,8 @@ namespace GeoSense.API.Controllers
         /// <summary>
         /// Exclui um usuário do sistema.
         /// </summary>
-        /// <param name="id">Identificador único do usuário</param>
-        /// <response code="204">Usuário removido com sucesso (No Content)</response>
-        /// <response code="404">Usuário não encontrado</response>
         [HttpDelete("{id}")]
+        [SwaggerOperation(Summary = "Remover usuário", Description = "Remove o usuário identificado pelo ID.")]
         [SwaggerResponse(204, "Usuário removido com sucesso (No Content)")]
         [SwaggerResponse(404, "Usuário não encontrado")]
         public async Task<IActionResult> DeleteUsuario(long id)
