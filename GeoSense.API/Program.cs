@@ -18,6 +18,8 @@ using Microsoft.OpenApi.Models;
 using MongoDB.Driver;
 using Swashbuckle.AspNetCore.Filters;
 using Swashbuckle.AspNetCore.SwaggerGen;
+using System;
+using System.Linq;
 using System.Reflection;
 using System.Text.Json;
 
@@ -107,7 +109,7 @@ namespace GeoSense.API
 
             builder.Services.AddVersionedApiExplorer(options =>
             {
-                options.GroupNameFormat = "'v'VVV";
+                options.GroupNameFormat = "'v'VVV"; // generates "v1", "v2", ...
                 options.SubstituteApiVersionInUrl = true;
             });
 
@@ -130,6 +132,7 @@ namespace GeoSense.API
                 var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
                 options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename), includeControllerXmlComments: true);
 
+                // static Swagger docs (we keep v1 and v2 defined)
                 options.SwaggerDoc("v1", new OpenApiInfo
                 {
                     Title = "GeoSense API",
@@ -146,17 +149,30 @@ namespace GeoSense.API
 
                 options.ExampleFilters();
 
-                // Include controllers based on ApiVersion attribute
+                // Robust DocInclusionPredicate: compare docName ("v1"/"v2") to controller ApiVersion Major value
                 options.DocInclusionPredicate((docName, apiDesc) =>
                 {
                     if (!apiDesc.TryGetMethodInfo(out var methodInfo)) return false;
 
-                    var versions = methodInfo.DeclaringType?
-                        .GetCustomAttributes(typeof(ApiVersionAttribute), true)
-                        .Cast<ApiVersionAttribute>()
-                        .SelectMany(attr => attr.Versions);
+                    // Collect ApiVersion attributes declared on controller type
+                    var apiVersionAttrs = methodInfo.DeclaringType?
+                        .GetCustomAttributes(true)
+                        .OfType<ApiVersionAttribute>()
+                        .ToArray();
 
-                    return versions?.Any(v => $"v{v}" == docName) ?? false;
+                    if (apiVersionAttrs == null || apiVersionAttrs.Length == 0) return false;
+
+                    foreach (var attr in apiVersionAttrs)
+                    {
+                        foreach (var ver in attr.Versions)
+                        {
+                            var group = ver.MajorVersion.HasValue ? $"v{ver.MajorVersion}" : $"v{ver}";
+                            if (string.Equals(group, docName, StringComparison.OrdinalIgnoreCase))
+                                return true;
+                        }
+                    }
+
+                    return false;
                 });
 
                 options.EnableAnnotations();
