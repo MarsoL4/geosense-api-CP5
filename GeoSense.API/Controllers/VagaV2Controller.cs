@@ -6,6 +6,7 @@ using GeoSense.API.Infrastructure.Persistence;
 using GeoSense.API.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
+using Swashbuckle.AspNetCore.Filters;
 
 namespace GeoSense.API.Controllers
 {
@@ -73,6 +74,7 @@ namespace GeoSense.API.Controllers
         [HttpPost]
         [SwaggerOperation(Summary = "Criar vaga (Mongo)", Description = "Cadastra uma nova vaga no MongoDB.")]
         [SwaggerResponse(201, "Vaga criada com sucesso (Mongo)")]
+        [SwaggerRequestExample(typeof(VagaDTO), typeof(GeoSense.API.Examples.VagaDTOExample))]
         public async Task<ActionResult> PostVaga(VagaDTO dto)
         {
             var vagas = await _repo.ObterTodasAsync();
@@ -107,6 +109,7 @@ namespace GeoSense.API.Controllers
         [SwaggerResponse(204, "Vaga atualizada com sucesso (Mongo)")]
         [SwaggerResponse(400, "Vaga duplicada no mesmo pátio")]
         [SwaggerResponse(404, "Vaga não encontrada")]
+        [SwaggerRequestExample(typeof(VagaDTO), typeof(GeoSense.API.Examples.VagaDTOExample))]
         public async Task<IActionResult> PutVaga(long id, VagaDTO dto)
         {
             var vaga = await _repo.ObterPorIdAsync(id);

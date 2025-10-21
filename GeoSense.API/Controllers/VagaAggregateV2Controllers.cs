@@ -1,9 +1,10 @@
-﻿// Substitua o arquivo atual por este (mantém o mesmo comportamento, só adiciona Swagger tags)
+﻿// Substitua o arquivo atual por este (mantém o mesmo behavior, só adiciona Swagger tags + example)
 using GeoSense.API.Domain.Aggregates;
 using GeoSense.API.Domain.Repositories;
 using GeoSense.API.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
+using Swashbuckle.AspNetCore.Filters;
 
 namespace GeoSense.API.Controllers
 {
@@ -28,6 +29,7 @@ namespace GeoSense.API.Controllers
         [SwaggerResponse(204, "Moto alocada com sucesso (agregado)")]
         [SwaggerResponse(400, "Solicitação inválida ou regra de negócio violada")]
         [SwaggerResponse(404, "Vaga ou Moto não encontrado")]
+        [SwaggerRequestExample(typeof(VagaAggregateV2Controller.AlocarMotoRequest), typeof(GeoSense.API.Examples.AlocarMotoRequestExample))]
         public async Task<IActionResult> AlocarMoto(long id, [FromBody] AlocarMotoRequest body)
         {
             if (body == null || body.MotoId <= 0)

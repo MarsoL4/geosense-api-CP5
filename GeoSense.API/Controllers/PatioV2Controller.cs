@@ -5,6 +5,7 @@ using GeoSense.API.Infrastructure.Persistence;
 using GeoSense.API.Services;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
+using Swashbuckle.AspNetCore.Filters;
 
 namespace GeoSense.API.Controllers
 {
@@ -72,6 +73,7 @@ namespace GeoSense.API.Controllers
         [SwaggerOperation(Summary = "Criar pátio (v2)", Description = "Cadastra novo pátio na versão v2.")]
         [SwaggerResponse(201, "Pátio criado com sucesso")]
         [SwaggerResponse(400, "Nome já existente")]
+        [SwaggerRequestExample(typeof(PatioDTO), typeof(GeoSense.API.Examples.PatioDTOExample))]
         public async Task<ActionResult> PostPatio(PatioDTO dto)
         {
             var patios = await _service.ObterTodasAsync();
@@ -100,6 +102,7 @@ namespace GeoSense.API.Controllers
         [SwaggerOperation(Summary = "Atualizar pátio (v2)", Description = "Atualiza um pátio existente na versão v2.")]
         [SwaggerResponse(204, "Pátio atualizado com sucesso")]
         [SwaggerResponse(404, "Pátio não encontrado")]
+        [SwaggerRequestExample(typeof(PatioDTO), typeof(GeoSense.API.Examples.PatioDTOExample))]
         public async Task<IActionResult> PutPatio(long id, PatioDTO dto)
         {
             var patio = await _service.ObterPorIdAsync(id);

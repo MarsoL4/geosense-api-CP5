@@ -5,6 +5,7 @@ using GeoSense.API.Infrastructure.Mongo;
 using GeoSense.API.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
+using Swashbuckle.AspNetCore.Filters;
 
 namespace GeoSense.API.Controllers
 {
@@ -93,6 +94,7 @@ namespace GeoSense.API.Controllers
         [SwaggerOperation(Summary = "Criar usuário (Mongo)", Description = "Cadastra um novo usuário no MongoDB.")]
         [SwaggerResponse(201, "Usuário criado com sucesso (Mongo)")]
         [SwaggerResponse(400, "Email já cadastrado")]
+        [SwaggerRequestExample(typeof(UsuarioDTO), typeof(GeoSense.API.Examples.UsuarioDTOExample))]
         public async Task<ActionResult> PostUsuario(UsuarioDTO dto)
         {
             var emailExiste = await _repo.EmailExisteAsync(dto.Email);
@@ -121,6 +123,7 @@ namespace GeoSense.API.Controllers
         [SwaggerResponse(204, "Usuário atualizado com sucesso (Mongo)")]
         [SwaggerResponse(400, "Email já cadastrado")]
         [SwaggerResponse(404, "Usuário não encontrado")]
+        [SwaggerRequestExample(typeof(UsuarioDTO), typeof(GeoSense.API.Examples.UsuarioDTOExample))]
         public async Task<IActionResult> PutUsuario(long id, UsuarioDTO dto)
         {
             var usuario = await _repo.ObterPorIdAsync(id);

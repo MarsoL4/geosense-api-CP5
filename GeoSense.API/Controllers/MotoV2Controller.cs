@@ -6,6 +6,7 @@ using GeoSense.API.Infrastructure.Persistence;
 using GeoSense.API.Services;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
+using Swashbuckle.AspNetCore.Filters;
 
 namespace GeoSense.API.Controllers
 {
@@ -75,6 +76,7 @@ namespace GeoSense.API.Controllers
         [SwaggerOperation(Summary = "Criar moto (Mongo)", Description = "Cadastra uma nova moto no MongoDB.")]
         [SwaggerResponse(201, "Moto criada com sucesso (Mongo)")]
         [SwaggerResponse(400, "Alguma restrição de negócio foi violada")]
+        [SwaggerRequestExample(typeof(MotoDTO), typeof(GeoSense.API.Examples.MotoDTOExample))]
         public async Task<ActionResult> PostMoto(MotoDTO dto)
         {
             var motos = await _repo.ObterTodasAsync();
@@ -120,6 +122,7 @@ namespace GeoSense.API.Controllers
         [SwaggerResponse(204, "Moto atualizada com sucesso (Mongo)")]
         [SwaggerResponse(400, "Restrição de negócio violada")]
         [SwaggerResponse(404, "Moto não encontrada")]
+        [SwaggerRequestExample(typeof(MotoDTO), typeof(GeoSense.API.Examples.MotoDTOExample))]
         public async Task<IActionResult> PutMoto(long id, MotoDTO dto)
         {
             var moto = await _repo.ObterPorIdAsync(id);
