@@ -8,13 +8,22 @@ namespace GeoSense.API.Helpers
     {
         public static List<LinkDTO> GetPagedLinks(IUrlHelper url, string resource, int page, int pageSize, int totalCount)
         {
+            // resource normalmente recebido como "Motos", "Vagas", "Patios", "Usuarios"
+            // controllerName assumido como singular (removendo 's' final quando aplicável)
+            var controllerName = resource;
+            if (resource.EndsWith("s") && resource.Length > 1)
+                controllerName = resource.Substring(0, resource.Length - 1);
+
+            // actionName esperado: "Get" + resource (ex: GetMotos)
+            var actionName = "Get" + resource;
+
             var links = new List<LinkDTO>
             {
                 new LinkDTO
                 {
                     Rel = "self",
                     Method = "GET",
-                    Href = url.Action("Get" + resource, resource, new { page, pageSize }) ?? string.Empty
+                    Href = url.Action(actionName, controllerName, new { page, pageSize }) ?? string.Empty
                 }
             };
 
@@ -26,7 +35,7 @@ namespace GeoSense.API.Helpers
                 {
                     Rel = "prev",
                     Method = "GET",
-                    Href = url.Action("Get" + resource, resource, new { page = page - 1, pageSize }) ?? string.Empty
+                    Href = url.Action(actionName, controllerName, new { page = page - 1, pageSize }) ?? string.Empty
                 });
             }
 
@@ -36,7 +45,7 @@ namespace GeoSense.API.Helpers
                 {
                     Rel = "next",
                     Method = "GET",
-                    Href = url.Action("Get" + resource, resource, new { page = page + 1, pageSize }) ?? string.Empty
+                    Href = url.Action(actionName, controllerName, new { page = page + 1, pageSize }) ?? string.Empty
                 });
             }
 
