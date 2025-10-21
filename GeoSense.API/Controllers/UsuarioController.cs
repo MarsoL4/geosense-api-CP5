@@ -33,7 +33,8 @@ namespace GeoSense.API.Controllers
             var paged = usuarios.Skip((page - 1) * pageSize).Take(pageSize).ToList();
             var items = _mapper.Map<List<UsuarioDTO>>(paged);
 
-            var links = HateoasHelper.GetPagedLinks(Url, "Usuarios", page, pageSize, totalCount);
+            // padronizado
+            var links = HateoasHelper.GetPagedLinks(Url, "usuario", page, pageSize, totalCount);
 
             var result = new PagedHateoasDTO<UsuarioDTO>
             {

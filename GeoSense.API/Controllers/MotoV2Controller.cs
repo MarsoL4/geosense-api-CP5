@@ -38,7 +38,8 @@ namespace GeoSense.API.Controllers
             var paged = motos.Skip((page - 1) * pageSize).Take(pageSize).ToList();
             var items = _mapper.Map<List<MotoDetalhesDTO>>(paged);
 
-            var links = HateoasHelper.GetPagedLinks(Url, "Motos", page, pageSize, totalCount);
+            // padronizado: singular lowercase resource name
+            var links = HateoasHelper.GetPagedLinks(Url, "moto", page, pageSize, totalCount);
 
             var result = new
             {
@@ -93,14 +94,8 @@ namespace GeoSense.API.Controllers
             if (chassiExiste)
                 return BadRequest(new { mensagem = "Já existe uma moto com esse chassi." });
 
-            var novaMoto = new Moto
-            {
-                Modelo = dto.Modelo,
-                Placa = dto.Placa,
-                Chassi = dto.Chassi,
-                ProblemaIdentificado = dto.ProblemaIdentificado,
-                VagaId = dto.VagaId
-            };
+            // usar AutoMapper em vez de new Moto { ... }
+            var novaMoto = _mapper.Map<Moto>(dto);
 
             await _repo.AdicionarAsync(novaMoto);
 

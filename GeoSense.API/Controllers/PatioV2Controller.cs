@@ -37,7 +37,8 @@ namespace GeoSense.API.Controllers
             var paged = patios.Skip((page - 1) * pageSize).Take(pageSize).ToList();
             var items = _mapper.Map<List<PatioDTO>>(paged);
 
-            var links = HateoasHelper.GetPagedLinks(Url, "Patios", page, pageSize, totalCount);
+            // padronizado
+            var links = HateoasHelper.GetPagedLinks(Url, "patio", page, pageSize, totalCount);
 
             return Ok(new { Items = items, TotalCount = totalCount, Page = page, PageSize = pageSize, Links = links });
         }
@@ -82,7 +83,8 @@ namespace GeoSense.API.Controllers
             if (nomeExistente)
                 return BadRequest(new { mensagem = "Já existe um pátio com esse nome." });
 
-            var novoPatio = new Patio { Nome = dto.Nome };
+            // usar AutoMapper
+            var novoPatio = _mapper.Map<Patio>(dto);
             await _service.AdicionarAsync(novoPatio);
 
             var patioCompleto = await _service.ObterPorIdAsync(novoPatio.Id);

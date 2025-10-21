@@ -37,7 +37,8 @@ namespace GeoSense.API.Controllers
             var paged = motos.Skip((page - 1) * pageSize).Take(pageSize).ToList();
             var items = _mapper.Map<List<MotoDetalhesDTO>>(paged);
 
-            var links = HateoasHelper.GetPagedLinks(Url, "Motos", page, pageSize, totalCount);
+            // padronizado: singular lowercase resource name
+            var links = HateoasHelper.GetPagedLinks(Url, "moto", page, pageSize, totalCount);
 
             var result = new PagedHateoasDTO<MotoDetalhesDTO>
             {

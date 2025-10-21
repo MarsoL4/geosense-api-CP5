@@ -38,7 +38,8 @@ namespace GeoSense.API.Controllers
             var paged = vagas.Skip((page - 1) * pageSize).Take(pageSize).ToList();
             var items = _mapper.Map<List<VagaDTO>>(paged);
 
-            var links = HateoasHelper.GetPagedLinks(Url, "Vagas", page, pageSize, totalCount);
+            // padronizado
+            var links = HateoasHelper.GetPagedLinks(Url, "vaga", page, pageSize, totalCount);
 
             var result = new
             {
@@ -83,11 +84,8 @@ namespace GeoSense.API.Controllers
             if (vagaExistente)
                 return BadRequest(new { mensagem = "Já existe uma vaga com esse número neste pátio." });
 
-            var novaVaga = new Vaga(dto.Numero, dto.PatioId)
-            {
-                Tipo = (TipoVaga)dto.Tipo,
-                Status = (StatusVaga)dto.Status
-            };
+            // usar AutoMapper em vez de new Vaga(...)
+            var novaVaga = _mapper.Map<Vaga>(dto);
 
             await _repo.AdicionarAsync(novaVaga);
 

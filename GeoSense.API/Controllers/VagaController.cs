@@ -33,7 +33,8 @@ namespace GeoSense.API.Controllers
             var paged = vagas.Skip((page - 1) * pageSize).Take(pageSize).ToList();
             var items = _mapper.Map<List<VagaDTO>>(paged);
 
-            var links = HateoasHelper.GetPagedLinks(Url, "Vagas", page, pageSize, totalCount);
+            // padronizado
+            var links = HateoasHelper.GetPagedLinks(Url, "vaga", page, pageSize, totalCount);
 
             var result = new PagedHateoasDTO<VagaDTO>
             {

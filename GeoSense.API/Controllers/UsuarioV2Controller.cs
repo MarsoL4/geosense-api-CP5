@@ -37,7 +37,8 @@ namespace GeoSense.API.Controllers
             var paged = usuarios.Skip((page - 1) * pageSize).Take(pageSize).ToList();
             var items = _mapper.Map<List<UsuarioDTO>>(paged);
 
-            var links = HateoasHelper.GetPagedLinks(Url, "Usuarios", page, pageSize, totalCount);
+            // padronizado
+            var links = HateoasHelper.GetPagedLinks(Url, "usuario", page, pageSize, totalCount);
 
             var result = new
             {
@@ -101,7 +102,8 @@ namespace GeoSense.API.Controllers
             if (emailExiste)
                 return BadRequest(new { mensagem = "Já existe um usuário com esse email." });
 
-            var novoUsuario = new Usuario(0, dto.Nome, dto.Email, dto.Senha, (Domain.Enums.TipoUsuario)dto.Tipo);
+            // usar AutoMapper
+            var novoUsuario = _mapper.Map<Usuario>(dto);
 
             await _repo.AdicionarAsync(novoUsuario);
 

@@ -34,7 +34,8 @@ namespace GeoSense.API.Controllers
             var paged = patios.Skip((page - 1) * pageSize).Take(pageSize).ToList();
             var items = _mapper.Map<List<PatioDTO>>(paged);
 
-            var links = HateoasHelper.GetPagedLinks(Url, "Patios", page, pageSize, totalCount);
+            // padronizado
+            var links = HateoasHelper.GetPagedLinks(Url, "patio", page, pageSize, totalCount);
 
             var result = new PagedHateoasDTO<PatioDTO>
             {
