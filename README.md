@@ -1,453 +1,188 @@
 # GeoSense API
 
-GeoSense API é uma solução RESTful desenvolvida em .NET para o gerenciamento de motos, vagas, pátios e usuários em ambientes de manutenção e estacionamento. O projeto utiliza arquitetura em camadas, Entity Framework Core, Oracle como banco de dados e documentação completa via Swagger/OpenAPI.
+GeoSense API é uma solução RESTful em .NET 8 para gerenciamento de motos, vagas, pátios e usuários. A API está organizada em camadas por pastas e inclui integração com MongoDB, Health Check e Swagger com versionamento (v1 / v2).
 
 ---
 
-## 👥 Integrantes
+## Integrantes
 
-- **Enzo Giuseppe Marsola** – RM: 556310, Turma: 2TDSPK  
-- **Rafael de Souza Pinto** – RM: 555130, Turma: 2TDSPY  
-- **Luiz Paulo F. Fernandes** – RM: 555497, Turma: 2TDSPF
-
----
-
-## 🏗 Justificativa do Domínio e Arquitetura
-
-O domínio foi escolhido para atender à necessidade de controle eficiente do fluxo de motos em pátios de manutenção, oficinas ou estacionamentos. O sistema permite cadastro, alocação e histórico de motos, gestão de vagas, controle de usuários com diferentes permissões.
-
-A arquitetura segue boas práticas REST, separação de responsabilidades (camadas Controller, Service, Repository), e utiliza recursos avançados como paginação, HATEOAS, DTOs e exemplos interativos no Swagger.
+- Enzo Giuseppe Marsola – RM: 556310  
+- Rafael de Souza Pinto – RM: 555130  
+- Luiz Paulo F. Fernandes – RM: 555497
 
 ---
 
-## 🚀 Instruções de Execução
+## Requisitos (ambiente)
 
-1. **Clonar o Repositório:**
-   ```bash
-   git clone https://github.com/MarsoL4/geosense-api.git
-   cd geosense-api
-   ```
+- .NET 8 SDK
+- Docker (opcional, recomendado para Mongo local)
+- Oracle DB caso deseje usar persistência relacional via EF Core como no projeto (se não houver, os endpoints v2 usam MongoDB)
 
-2. **Configurar o Banco de Dados:**  
-   Edite o arquivo `GeoSense.API/appsettings.json` com sua string de conexão Oracle em `"ConnectionStrings:Oracle"`.
-
-3. **Restaurar os Pacotes e Compilar:**  
-   ```bash
-   dotnet restore
-   dotnet build
-   ```
-
-4. **Executar a API:**  
-   ```bash
-   dotnet run --project GeoSense.API
-   ```
-   Acesse a documentação Swagger em:  
-   `http://localhost:5194/swagger` ou `https://localhost:7150/swagger`
-
-5. **Rodar Testes Automatizados:**  
-   ```bash
-   dotnet test
-   ```
+Portas padrão (conforme launchSettings.json):
+- HTTP: 5194
+- HTTPS: 7150
 
 ---
 
-## 🔑 Principais Entidades
+## Configuração
 
-- **Moto:** Controle de motos cadastradas, informações de placa, chassi, modelo e vaga alocada.
-- **Vaga:** Gerenciamento de vagas disponíveis em pátios, incluindo status e tipo.
-- **Usuário:** Cadastro de usuários do sistema, com controle de papéis (administrador, mecânico) e autenticação.
-- **Pátio:** Cadastro e gestão dos pátios onde as vagas são distribuídas.
+Editar `GeoSense.API/appsettings.json` conforme seu ambiente:
 
----
+- ConnectionStrings:Oracle — string de conexão Oracle (se usar EF/Oracle).
+- MongoSettings:
+  - ConnectionString (ex.: `mongodb://localhost:27017`)
+  - DatabaseName (ex.: `geosense`)
 
-## 📑 Endpoints e Exemplos de Uso
-
-### 🛵 MotoController
-
-#### Listar Motos (Paginação + HATEOAS)
-- **GET** `/api/moto?page=1&pageSize=10`
-- **Resposta:**
-    ```json
-    {
-      "items": [
-        {
-          "id": 1,
-          "modelo": "Honda CG 160",
-          "placa": "ABC1D23",
-          "chassi": "9C2JC4110JR000001",
-          "problemaIdentificado": "Motor com ruído excessivo",
-          "vagaId": 1
-        }
-      ],
-      "totalCount": 1,
-      "page": 1,
-      "pageSize": 10,
-      "links": [
-        { "rel": "self", "method": "GET", "href": "/api/moto?page=1&pageSize=10" }
-      ]
-    }
-    ```
-
-#### Buscar Moto por ID
-- **GET** `/api/moto/{id}`
-- **Resposta:**
-    ```json
-    {
-      "id": 1,
-      "modelo": "Honda CG 160",
-      "placa": "ABC1D23",
-      "chassi": "9C2JC4110JR000001",
-      "problemaIdentificado": "Motor com ruído excessivo",
-      "vagaId": 1
-    }
-    ```
-
-#### Criar Moto
-- **POST** `/api/moto`
-- **Payload de exemplo:**
-    ```json
-    {
-      "modelo": "Honda CG 160",
-      "placa": "ABC1D23",
-      "chassi": "9C2JC4110JR000001",
-      "problemaIdentificado": "Motor com ruído excessivo",
-      "vagaId": 1
-    }
-    ```
-- **Resposta:**
-    ```json
-    {
-      "mensagem": "Moto cadastrada com sucesso.",
-      "dados": {
-        "id": 1,
-        "modelo": "Honda CG 160",
-        "placa": "ABC1D23",
-        "chassi": "9C2JC4110JR000001",
-        "problemaIdentificado": "Motor com ruído excessivo",
-        "vagaId": 1
-      }
-    }
-    ```
-
-#### Atualizar Moto
-- **PUT** `/api/moto/{id}`
-- **Payload igual ao POST**
-- **Resposta:**
-    ```json
-    {
-      "mensagem": "Moto atualizada com sucesso.",
-      "dados": {
-        "id": 1,
-        "modelo": "Honda CG 160",
-        "placa": "ABC1D23",
-        "chassi": "9C2JC4110JR000001",
-        "problemaIdentificado": "Motor com ruído excessivo",
-        "vagaId": 1
-      }
-    }
-    ```
-
-#### Remover Moto
-- **DELETE** `/api/moto/{id}`
-- **Resposta:**
-    ```json
-    {
-      "mensagem": "Moto deletada com sucesso."
-    }
-    ```
+Exemplo mínimo (já presente no projeto):
+```json
+"ConnectionStrings": {
+  "Oracle": "Data Source=xxx.xxx.xxx:xxxx/xxxx;User ID=xxxx;Password=xxx;",
+  "Mongo": "mongodb://localhost:27017"
+},
+"MongoSettings": {
+  "ConnectionString": "mongodb://localhost:27017",
+  "DatabaseName": "geosense"
+}
+```
 
 ---
 
-### 🅿️ VagaController
+## Rodando um MongoDB local (opcional)
 
-#### Listar Vagas (Paginação + HATEOAS)
-- **GET** `/api/vaga?page=1&pageSize=10`
-- **Resposta:**
-    ```json
-    {
-      "items": [
-        {
-          "id": 1,
-          "numero": 101,
-          "tipo": 0,
-          "status": 0,
-          "patioId": 1,
-          "motoId": 2
-        }
-      ],
-      "totalCount": 1,
-      "page": 1,
-      "pageSize": 10,
-      "links": [
-        { "rel": "self", "method": "GET", "href": "/api/vaga?page=1&pageSize=10" }
-      ]
-    }
-    ```
+Com Docker (comando rápido):
+```bash
+docker run -d --name geosense-mongo -p 27017:27017 mongo:6
+```
 
-#### Buscar Vaga por ID
-- **GET** `/api/vaga/{id}`
-- **Resposta:**
-    ```json
-    {
-      "id": 1,
-      "numero": 101,
-      "tipo": 0,
-      "status": 0,
-      "patioId": 1,
-      "motoId": 2
-    }
-    ```
-
-#### Criar Vaga
-- **POST** `/api/vaga`
-- **Payload de exemplo:**
-    ```json
-    {
-      "numero": 101,
-      "tipo": 0,
-      "status": 0,
-      "patioId": 1
-    }
-    ```
-- **Resposta:**
-    ```json
-    {
-      "mensagem": "Vaga cadastrada com sucesso.",
-      "dados": {
-        "id": 1,
-        "numero": 101,
-        "tipo": 0,
-        "status": 0,
-        "patioId": 1,
-        "motoId": null
-      }
-    }
-    ```
-
-#### Atualizar Vaga
-- **PUT** `/api/vaga/{id}`
-- **Payload igual ao POST**
-- **Resposta:**
-    ```json
-    {
-      "mensagem": "Vaga atualizada com sucesso.",
-      "dados": {
-        "id": 1,
-        "numero": 101,
-        "tipo": 0,
-        "status": 1,
-        "patioId": 1,
-        "motoId": 2
-      }
-    }
-    ```
-
-#### Remover Vaga
-- **DELETE** `/api/vaga/{id}`
-- **Resposta:**
-    ```json
-    {
-      "mensagem": "Vaga deletada com sucesso."
-    }
-    ```
+Após subir o Mongo local, o valor padrão em `appsettings.json` (`mongodb://localhost:27017`) funciona sem alterações.
 
 ---
 
-### 🏢 PatioController
+## Build e execução
 
-#### Listar Pátios (Paginação + HATEOAS)
-- **GET** `/api/patio?page=1&pageSize=10`
-- **Resposta:**
-    ```json
-    {
-      "items": [
-        {
-          "id": 1,
-          "nome": "Pátio Central"
-        }
-      ],
-      "totalCount": 1,
-      "page": 1,
-      "pageSize": 10,
-      "links": [
-        { "rel": "self", "method": "GET", "href": "/api/patio?page=1&pageSize=10" }
-      ]
-    }
-    ```
+1. Restaurar pacotes e compilar:
+```bash
+dotnet restore
+dotnet build
+```
 
-#### Buscar Pátio por ID (com vagas)
-- **GET** `/api/patio/{id}`
-- **Resposta:**
-    ```json
-    {
-      "id": 1,
-      "nome": "Pátio Central",
-      "vagas": [
-        {
-          "id": 1,
-          "numero": 101,
-          "tipo": 0,
-          "status": 0,
-          "patioId": 1,
-          "motoId": null
-        }
-      ]
-    }
-    ```
+2. Executar a API:
+```bash
+dotnet run --project GeoSense.API
+```
 
-#### Criar Pátio
-- **POST** `/api/patio`
-- **Payload de exemplo:**
-    ```json
-    {
-      "nome": "Pátio Central"
-    }
-    ```
-- **Resposta:**
-    ```json
-    {
-      "mensagem": "Pátio cadastrado com sucesso.",
-      "dados": {
-        "id": 1,
-        "nome": "Pátio Central"
-      }
-    }
-    ```
-
-#### Atualizar Pátio
-- **PUT** `/api/patio/{id}`
-- **Payload igual ao POST**
-- **Resposta:**
-    ```json
-    {
-      "mensagem": "Pátio atualizado com sucesso.",
-      "dados": {
-        "id": 1,
-        "nome": "Pátio Central"
-      }
-    }
-    ```
-
-#### Remover Pátio
-- **DELETE** `/api/patio/{id}`
-- **Resposta:**
-    ```json
-    {
-      "mensagem": "Pátio deletado com sucesso."
-    }
-    ```
+- Swagger UI: http://localhost:5194/swagger (ou pela porta HTTPS definida)
+- Health Check: http://localhost:5194/health
 
 ---
 
-### 👤 UsuarioController
+## Health Check
 
-#### Listar Usuários (Paginação + HATEOAS)
-- **GET** `/api/usuario?page=1&pageSize=10`
-- **Resposta:**
-    ```json
-    {
-      "items": [
-        {
-          "id": 1,
-          "nome": "Rafael de Souza Pinto",
-          "email": "rafael.pinto@exemplo.com",
-          "senha": "12345678",
-          "tipo": 0
-        }
-      ],
-      "totalCount": 1,
-      "page": 1,
-      "pageSize": 10,
-      "links": [
-        { "rel": "self", "method": "GET", "href": "/api/usuario?page=1&pageSize=10" }
-      ]
-    }
-    ```
+Endpoint: `/health`
 
-#### Buscar Usuário por ID
-- **GET** `/api/usuario/{id}`
-- **Resposta:**
-    ```json
-    {
-      "id": 1,
-      "nome": "Rafael de Souza Pinto",
-      "email": "rafael.pinto@exemplo.com",
-      "senha": "12345678",
-      "tipo": 0
-    }
-    ```
-
-#### Criar Usuário
-- **POST** `/api/usuario`
-- **Payload de exemplo:**
-    ```json
-    {
-      "nome": "Rafael de Souza Pinto",
-      "email": "rafael.pinto@exemplo.com",
-      "senha": "12345678",
-      "tipo": 0
-    }
-    ```
-- **Resposta:**
-    ```json
-    {
-      "mensagem": "Usuário cadastrado com sucesso.",
-      "dados": {
-        "id": 1,
-        "nome": "Rafael de Souza Pinto",
-        "email": "rafael.pinto@exemplo.com",
-        "senha": "12345678",
-        "tipo": 0
-      }
-    }
-    ```
-
-#### Atualizar Usuário
-- **PUT** `/api/usuario/{id}`
-- **Payload igual ao POST**
-- **Resposta:**
-    ```json
-    {
-      "mensagem": "Usuário atualizado com sucesso.",
-      "dados": {
-        "id": 1,
-        "nome": "Rafael de Souza Pinto",
-        "email": "rafael.pinto@exemplo.com",
-        "senha": "12345678",
-        "tipo": 0
-      }
-    }
-    ```
-
-#### Remover Usuário
-- **DELETE** `/api/usuario/{id}`
-- **Resposta:**
-    ```json
-    {
-      "mensagem": "Usuário deletado com sucesso."
-    }
-    ```
+- Verifica conectividade com:
+  - DbContext (EF Core / Oracle) — se configurado.
+  - MongoDB (HealthCheck custom para Mongo).
+- A resposta é JSON com status geral, duração e detalhes das entradas (Database, MongoDB).
 
 ---
 
-### 🧩 DashboardController
+## Swagger / Versionamento
 
-#### Dados agregados do sistema para o dashboard
-- **GET** `/api/dashboard`
-- **Resposta:**
-    ```json
-    {
-      "totalMotos": 10,
-      "motosComProblema": 2,
-      "vagasLivres": 5,
-      "vagasOcupadas": 5,
-      "totalVagas": 10
-    }
-    ```
+- A API utiliza versionamento via URL segment (ApiVersioning).
+- Swagger expõe documentação separada para cada versão (v1 e v2).
+  - v1 -> endpoints que usam repositórios EF/Oracle (controllers com ApiVersion "1.0")
+  - v2 -> endpoints que usam repositórios Mongo (controllers com ApiVersion "2.0")
+- No Swagger UI você verá entradas para:
+  - GeoSense API v1
+  - GeoSense API v2
 
 ---
 
-## 🧩 Swagger/OpenAPI
+## Endpoints (resumo com versionamento)
 
-- Todos os endpoints possuem descrição, parâmetros documentados, exemplos de payload (POST/PUT) e modelos de dados.
-- Acesse `/swagger` para explorar e testar a API interativamente.
+- Versão via URL: `/api/v{version}/...`  
+  (ex.: `/api/v1/moto`, `/api/v2/moto`)
+
+Moto
+- GET  /api/v1/moto?page=1&pageSize=10
+- GET  /api/v1/moto/{id}
+- POST /api/v1/moto
+- PUT  /api/v1/moto/{id}
+- DELETE /api/v1/moto/{id}
+
+- GET  /api/v2/moto
+- GET  /api/v2/moto/{id}
+- POST /api/v2/moto
+- PUT  /api/v2/moto/{id}
+- DELETE /api/v2/moto/{id}
+
+Vaga
+- GET  /api/v1/vaga?page=1&pageSize=10
+- GET  /api/v1/vaga/{id}
+- POST /api/v1/vaga
+- PUT  /api/v1/vaga/{id}
+- DELETE /api/v1/vaga/{id}
+
+- GET  /api/v2/vaga
+- GET  /api/v2/vaga/{id}
+- POST /api/v2/vaga
+- PUT  /api/v2/vaga/{id}
+- DELETE /api/v2/vaga/{id}
+
+Pátio
+- GET  /api/v1/patio?page=1&pageSize=10
+- GET  /api/v1/patio/{id}
+- POST /api/v1/patio
+- PUT  /api/v1/patio/{id}
+- DELETE /api/v1/patio/{id}
+
+- GET  /api/v2/patio
+- GET  /api/v2/patio/{id}
+- POST /api/v2/patio
+- PUT  /api/v2/patio/{id}
+- DELETE /api/v2/patio/{id}
+
+Usuário
+- GET  /api/v1/usuario?page=1&pageSize=10
+- GET  /api/v1/usuario/{id}
+- GET  /api/v1/usuario/{email}
+- POST /api/v1/usuario
+- PUT  /api/v1/usuario/{id}
+- DELETE /api/v1/usuario/{id}
+
+- GET  /api/v2/usuario
+- GET  /api/v2/usuario/{id}
+- GET  /api/v2/usuario/by-email/{email}
+- POST /api/v2/usuario
+- PUT  /api/v2/usuario/{id}
+- DELETE /api/v2/usuario/{id}
+
+Aggregate (VagaAggregate v2)
+- POST /api/v2/vaga-aggregate/{id}/alocar   (body: { "motoId": long })
+- POST /api/v2/vaga-aggregate/{id}/liberar
+
+HATEOAS:
+- List endpoints retornam links `self`, `prev`, `next` (gerados pelo helper HATEOAS).
+
+---
+
+## Testes
+
+Executar todos os testes:
+```bash
+dotnet test
+```
+
+- Os testes de integração com Mongo utilizam Mongo2Go (in-memory/ephemeral) — não é necessário um Mongo externo para esses testes.
+- Os testes unitários usam in-memory provider do EF Core quando aplicável.
+
+---
+
+## Observações de configuração rápida
+
+- Para usar endpoints v2 (Mongo) assegure que `MongoSettings:ConnectionString` aponte para um Mongo acessível.
+- Para que `/health` reporte sucesso para todos checks, assegure que tanto Oracle (DbContext) quanto Mongo estejam acessíveis, ou ajuste `appsettings.json` conforme seu ambiente de avaliação.
+Para dúvidas sobre execução ou configuração, abra uma issue no repositório.
+
+```
