@@ -9,7 +9,7 @@ using Swashbuckle.AspNetCore.Annotations;
 namespace GeoSense.API.Controllers
 {
     [ApiVersion("2.0")]
-    [Route("api/v{version:apiVersion}/[controller]")]
+    [Route("api/v{version:apiVersion}/usuario")]
     [ApiController]
     public class UsuarioV2Controller : ControllerBase
     {
@@ -26,6 +26,7 @@ namespace GeoSense.API.Controllers
         /// Retorna uma lista paginada de usuários cadastrados (Mongo).
         /// </summary>
         [HttpGet]
+        [SwaggerOperation(Summary = "Retorna uma lista paginada de usuários cadastrados (Mongo).", Tags = new[] { "Usuario (v2)" })]
         [SwaggerResponse(200, "Lista paginada de usuários (Mongo)", typeof(object))]
         public async Task<ActionResult> GetUsuarios([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
@@ -52,6 +53,7 @@ namespace GeoSense.API.Controllers
         /// Retorna os dados de um usuário por ID (Mongo).
         /// </summary>
         [HttpGet("{id:long}")]
+        [SwaggerOperation(Summary = "Retorna os dados de um usuário por ID (Mongo).", Tags = new[] { "Usuario (v2)" })]
         [SwaggerResponse(200, "Usuário encontrado (Mongo)", typeof(UsuarioDTO))]
         [SwaggerResponse(404, "Usuário não encontrado")]
         public async Task<ActionResult<UsuarioDTO>> GetUsuario(long id)
@@ -68,6 +70,7 @@ namespace GeoSense.API.Controllers
         /// Retorna os dados de um usuário por email (Mongo).
         /// </summary>
         [HttpGet("by-email/{email}")]
+        [SwaggerOperation(Summary = "Retorna os dados de um usuário por email (Mongo).", Tags = new[] { "Usuario (v2)" })]
         [SwaggerResponse(200, "Usuário encontrado por email", typeof(UsuarioDTO))]
         [SwaggerResponse(404, "Usuário não encontrado")]
         public async Task<ActionResult<UsuarioDTO>> GetUsuarioPorEmail(string email)
@@ -86,6 +89,7 @@ namespace GeoSense.API.Controllers
         /// Cadastra um novo usuário (Mongo).
         /// </summary>
         [HttpPost]
+        [SwaggerOperation(Summary = "Cadastra um novo usuário (Mongo).", Tags = new[] { "Usuario (v2)" })]
         [SwaggerResponse(201, "Usuário criado com sucesso (Mongo)")]
         [SwaggerResponse(400, "Email já cadastrado")]
         public async Task<ActionResult> PostUsuario(UsuarioDTO dto)
@@ -111,7 +115,8 @@ namespace GeoSense.API.Controllers
         /// <summary>
         /// Atualiza os dados de um usuário existente (Mongo).
         /// </summary>
-        [HttpPut("{id}")]
+        [HttpPut("{id:long}")]
+        [SwaggerOperation(Summary = "Atualiza os dados de um usuário existente (Mongo).", Tags = new[] { "Usuario (v2)" })]
         [SwaggerResponse(204, "Usuário atualizado com sucesso (Mongo)")]
         [SwaggerResponse(400, "Email já cadastrado")]
         [SwaggerResponse(404, "Usuário não encontrado")]
@@ -138,7 +143,8 @@ namespace GeoSense.API.Controllers
         /// <summary>
         /// Exclui um usuário do sistema (Mongo).
         /// </summary>
-        [HttpDelete("{id}")]
+        [HttpDelete("{id:long}")]
+        [SwaggerOperation(Summary = "Exclui um usuário do sistema (Mongo).", Tags = new[] { "Usuario (v2)" })]
         [SwaggerResponse(204, "Usuário removido com sucesso (Mongo)")]
         [SwaggerResponse(404, "Usuário não encontrado")]
         public async Task<IActionResult> DeleteUsuario(long id)
