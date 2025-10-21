@@ -47,17 +47,6 @@ Exemplo mínimo (já presente no projeto):
 
 ---
 
-## Rodando um MongoDB local (opcional)
-
-Com Docker (comando rápido):
-```bash
-docker run -d --name geosense-mongo -p 27017:27017 mongo:6
-```
-
-Após subir o Mongo local, o valor padrão em `appsettings.json` (`mongodb://localhost:27017`) funciona sem alterações.
-
----
-
 ## Build e execução
 
 1. Restaurar pacotes e compilar:
@@ -96,6 +85,132 @@ Endpoint: `/health`
 - No Swagger UI você verá entradas para:
   - GeoSense API v1
   - GeoSense API v2
+
+Como abrir cada versão no Swagger UI:
+- Acesse http://localhost:5194/swagger
+- No topo da página há um seletor/lista com as documentações geradas (ex.: "GeoSense API v1", "GeoSense API v2"). Selecione a versão desejada para visualizar apenas os endpoints daquela versão.
+
+---
+
+## Exemplos de chamadas (curl) — v1 e v2
+
+Observação: substitua `localhost:5194` pela URL/alvo onde a API está executando. Os exemplos abaixo usam JSON e as portas padrão da aplicação em desenvolvimento.
+
+Exemplo de GET paginado (motos) — v1 (EF/Oracle)
+```bash
+curl -s -X GET "http://localhost:5194/api/v1/moto?page=1&pageSize=10" -H "Accept: application/json"
+```
+
+Exemplo de GET paginado (motos) — v2 (Mongo)
+```bash
+curl -s -X GET "http://localhost:5194/api/v2/moto?page=1&pageSize=10" -H "Accept: application/json"
+```
+
+Exemplo de GET por id — v1
+```bash
+curl -s -X GET "http://localhost:5194/api/v1/moto/1" -H "Accept: application/json"
+```
+
+Exemplo de GET por id — v2
+```bash
+curl -s -X GET "http://localhost:5194/api/v2/moto/1633024800000" -H "Accept: application/json"
+```
+(Nos endpoints v2 os ids podem ser gerados no formato unix-ms; o exemplo acima é ilustrativo.)
+
+Exemplo de POST (criar moto) — v1
+```bash
+curl -s -X POST "http://localhost:5194/api/v1/moto" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "modelo": "Honda CG 160",
+    "placa": "ABC1D23",
+    "chassi": "9C2JC4110JR000001",
+    "problemaIdentificado": "Motor com ruído",
+    "vagaId": 1
+  }'
+```
+
+Exemplo de POST (criar moto) — v2
+```bash
+curl -s -X POST "http://localhost:5194/api/v2/moto" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "modelo": "Honda CG 160",
+    "placa": "ABC1D23",
+    "chassi": "9C2JC4110JR000001",
+    "problemaIdentificado": "Motor com ruído",
+    "vagaId": 1
+  }'
+```
+
+Exemplo de POST (criar vaga) — v1
+```bash
+curl -s -X POST "http://localhost:5194/api/v1/vaga" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "numero": 101,
+    "tipo": 0,
+    "status": 0,
+    "patioId": 1
+  }'
+```
+
+Exemplo de POST (criar vaga) — v2
+```bash
+curl -s -X POST "http://localhost:5194/api/v2/vaga" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "numero": 101,
+    "tipo": 0,
+    "status": 0,
+    "patioId": 1
+  }'
+```
+
+Exemplo de POST (criar pátio) — v1
+```bash
+curl -s -X POST "http://localhost:5194/api/v1/patio" \
+  -H "Content-Type: application/json" \
+  -d '{ "nome": "Pátio Central" }'
+```
+
+Exemplo de POST (criar pátio) — v2
+```bash
+curl -s -X POST "http://localhost:5194/api/v2/patio" \
+  -H "Content-Type: application/json" \
+  -d '{ "nome": "Pátio Central" }'
+```
+
+Exemplo de POST (criar usuário) — v1
+```bash
+curl -s -X POST "http://localhost:5194/api/v1/usuario" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "nome": "Rafael de Souza Pinto",
+    "email": "rafael.pinto@exemplo.com",
+    "senha": "12345678",
+    "tipo": 0
+  }'
+```
+
+Exemplo de POST (criar usuário) — v2
+```bash
+curl -s -X POST "http://localhost:5194/api/v2/usuario" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "nome": "Rafael de Souza Pinto",
+    "email": "rafael.pinto@exemplo.com",
+    "senha": "12345678",
+    "tipo": 0
+  }'
+```
+
+Exemplo de uso do agregado (alocar moto) — v2
+```bash
+curl -s -X POST "http://localhost:5194/api/v2/vaga-aggregate/123/alocar" \
+  -H "Content-Type: application/json" \
+  -d '{ "motoId": 1633024800000 }'
+```
 
 ---
 
@@ -183,6 +298,3 @@ dotnet test
 
 - Para usar endpoints v2 (Mongo) assegure que `MongoSettings:ConnectionString` aponte para um Mongo acessível.
 - Para que `/health` reporte sucesso para todos checks, assegure que tanto Oracle (DbContext) quanto Mongo estejam acessíveis, ou ajuste `appsettings.json` conforme seu ambiente de avaliação.
-Para dúvidas sobre execução ou configuração, abra uma issue no repositório.
-
-```
