@@ -58,11 +58,17 @@ namespace GeoSense.API.Domain.Aggregates
             vaga.Status = Status;
             vaga.PatioId = PatioId;
 
+            // Garantir que a coleção de motos esteja inicializada antes de manipular
+            if (vaga.Motos == null)
+            {
+                vaga.Motos = new List<Moto>();
+            }
+
             // sincronização simplificada de Motos: se houver moto alocada, garante que exista na coleção
             if (MotoId.HasValue)
             {
-                // Se a coleção de motos estiver vazia ou não contiver a moto, adiciona um placeholder (somente ID)
-                var existing = vaga.Motos?.FirstOrDefault(m => m.Id == MotoId.Value);
+                // Se a coleção de motos não contiver a moto, adiciona um placeholder (somente ID)
+                var existing = vaga.Motos.FirstOrDefault(m => m.Id == MotoId.Value);
                 if (existing == null)
                 {
                     // Criamos uma moto placeholder com apenas o id para representar a alocação.
