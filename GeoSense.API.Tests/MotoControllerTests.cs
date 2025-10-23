@@ -1,9 +1,8 @@
 ﻿using Xunit;
-using GeoSense.API.Api.Controllers;
+using GeoSense.API.Api.Controllers.v1;
 using GeoSense.API.Infrastructure.EF.Repositories;
 using GeoSense.API.Application.Services;
 using Microsoft.EntityFrameworkCore;
-using GeoSense.API.Application.DTOs;
 using Microsoft.AspNetCore.Mvc;
 using AutoMapper;
 using GeoSense.API.Application.DTOs.Moto;
