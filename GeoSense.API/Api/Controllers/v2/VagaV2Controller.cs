@@ -8,7 +8,7 @@ using GeoSense.API.Application.DTOs.Vaga;
 using GeoSense.API.Api.Helpers;
 using GeoSense.API.Domain.Entities;
 
-namespace GeoSense.API.Api.Controllers
+namespace GeoSense.API.Api.Controllers.v2
 {
     [ApiVersion("2.0")]
     [Route("api/v{version:apiVersion}/vaga")]

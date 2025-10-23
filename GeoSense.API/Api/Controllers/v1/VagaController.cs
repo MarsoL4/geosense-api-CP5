@@ -9,7 +9,7 @@ using GeoSense.API.Application.Services;
 using GeoSense.API.Api.Helpers;
 using GeoSense.API.Domain.Entities;
 
-namespace GeoSense.API.Api.Controllers
+namespace GeoSense.API.Api.Controllers.v1
 {
     [ApiVersion("1.0")]
     [Route("api/v{version:apiVersion}/[controller]")]

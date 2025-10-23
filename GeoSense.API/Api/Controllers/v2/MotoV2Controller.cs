@@ -7,22 +7,16 @@ using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using Swashbuckle.AspNetCore.Filters;
 
-namespace GeoSense.API.Api.Controllers
+namespace GeoSense.API.Api.Controllers.v2
 {
     [ApiVersion("2.0")]
     [Route("api/v{version:apiVersion}/moto")]
     [ApiController]
     [Produces("application/json")]
-    public class MotoV2Controller : ControllerBase
+    public class MotoV2Controller(MotoMongoRepository repo, IMapper mapper) : ControllerBase
     {
-        private readonly MotoMongoRepository _repo;
-        private readonly IMapper _mapper;
-
-        public MotoV2Controller(MotoMongoRepository repo, IMapper mapper)
-        {
-            _repo = repo;
-            _mapper = mapper;
-        }
+        private readonly MotoMongoRepository _repo = repo;
+        private readonly IMapper _mapper = mapper;
 
         /// <summary>
         /// Retorna uma lista paginada de motos cadastradas (Mongo).

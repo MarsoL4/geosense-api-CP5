@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using Swashbuckle.AspNetCore.Filters;
 
-namespace GeoSense.API.Api.Controllers
+namespace GeoSense.API.Api.Controllers.v2
 {
     [ApiVersion("2.0")]
     [Route("api/v{version:apiVersion}/vaga-aggregate")]
