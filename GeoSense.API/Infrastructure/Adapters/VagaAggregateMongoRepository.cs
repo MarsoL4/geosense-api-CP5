@@ -12,21 +12,15 @@ namespace GeoSense.API.Infrastructure.Adapters
     /// Adapter que implementa IVagaAggregateRepository persistindo/consultando via VagaMongoRepository.
     /// Usa a classe de domínio VagaAggregate como contrato na aplicação.
     /// </summary>
-    public class VagaAggregateMongoRepository : IVagaAggregateRepository
+    public class VagaAggregateMongoRepository(VagaMongoRepository vagaRepo, MotoMongoRepository motoRepo) : IVagaAggregateRepository
     {
-        private readonly VagaMongoRepository _vagaRepo;
-        private readonly MotoMongoRepository _motoRepo;
-
-        public VagaAggregateMongoRepository(VagaMongoRepository vagaRepo, MotoMongoRepository motoRepo)
-        {
-            _vagaRepo = vagaRepo;
-            _motoRepo = motoRepo;
-        }
+        private readonly VagaMongoRepository _vagaRepo = vagaRepo;
+        private readonly MotoMongoRepository _motoRepo = motoRepo;
 
         public async Task<List<VagaAggregate>> ObterTodasAsync()
         {
             var vagas = await _vagaRepo.ObterTodasAsync();
-            return vagas.Select(VagaAggregate.FromPersistence).ToList();
+            return [.. vagas.Select(VagaAggregate.FromPersistence)];
         }
 
         public async Task<VagaAggregate?> ObterPorIdAsync(long id)
@@ -67,8 +61,7 @@ namespace GeoSense.API.Infrastructure.Adapters
 
         public async Task AtualizarAsync(VagaAggregate vagaAggregate)
         {
-            var existing = await _vagaRepo.ObterPorIdAsync(vagaAggregate.Id);
-            if (existing == null) throw new InvalidOperationException("Vaga não encontrada.");
+            var existing = await _vagaRepo.ObterPorIdAsync(vagaAggregate.Id) ?? throw new InvalidOperationException("Vaga não encontrada.");
 
             // Id da moto previamente alocada (se houver)
             var previousMotoId = existing.Motos?.FirstOrDefault()?.Id;
@@ -124,8 +117,7 @@ namespace GeoSense.API.Infrastructure.Adapters
 
         public async Task RemoverAsync(VagaAggregate vagaAggregate)
         {
-            var existing = await _vagaRepo.ObterPorIdAsync(vagaAggregate.Id);
-            if (existing == null) throw new InvalidOperationException("Vaga não encontrada.");
+            var existing = await _vagaRepo.ObterPorIdAsync(vagaAggregate.Id) ?? throw new InvalidOperationException("Vaga não encontrada.");
 
             // Antes de remover, se havia moto alocada, limpar VagaId dela
             var allocatedMotoId = existing.Motos?.FirstOrDefault()?.Id;

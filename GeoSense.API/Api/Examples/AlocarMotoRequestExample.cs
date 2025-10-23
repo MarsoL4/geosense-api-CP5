@@ -1,5 +1,5 @@
 ﻿using Swashbuckle.AspNetCore.Filters;
-using GeoSense.API.Api.Controllers;
+using GeoSense.API.Api.Controllers.v2;
 
 namespace GeoSense.API.Api.Examples
 {
