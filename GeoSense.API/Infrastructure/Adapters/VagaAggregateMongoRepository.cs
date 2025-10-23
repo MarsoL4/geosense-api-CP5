@@ -2,6 +2,9 @@
 using GeoSense.API.Domain.Repositories;
 using GeoSense.API.Infrastructure.Mongo;
 using GeoSense.API.Domain.Entities;
+using System.Linq;
+using System.Threading.Tasks;
+using System;
 
 namespace GeoSense.API.Infrastructure.Adapters
 {
@@ -47,6 +50,18 @@ namespace GeoSense.API.Infrastructure.Adapters
             vagaAggregate.ApplyToPersistence(vaga);
 
             var inserted = await _vagaRepo.AdicionarAsync(vaga);
+
+            // Sincronizar moto (se houve alocação no agregado)
+            if (vagaAggregate.MotoId.HasValue)
+            {
+                var moto = await _motoRepo.ObterPorIdAsync(vagaAggregate.MotoId.Value);
+                if (moto != null)
+                {
+                    moto.VagaId = inserted.Id;
+                    await _motoRepo.AtualizarAsync(moto);
+                }
+            }
+
             return VagaAggregate.FromPersistence(inserted);
         }
 
@@ -55,16 +70,74 @@ namespace GeoSense.API.Infrastructure.Adapters
             var existing = await _vagaRepo.ObterPorIdAsync(vagaAggregate.Id);
             if (existing == null) throw new InvalidOperationException("Vaga não encontrada.");
 
+            // Id da moto previamente alocada (se houver)
+            var previousMotoId = existing.Motos?.FirstOrDefault()?.Id;
+
             // Aplica alterações do agregado na entidade existente
             vagaAggregate.ApplyToPersistence(existing);
 
             await _vagaRepo.AtualizarAsync(existing);
+
+            // Se houve mudança na alocação, atualiza os documentos de Moto correspondentes
+            var newMotoId = vagaAggregate.MotoId;
+
+            if (previousMotoId != newMotoId)
+            {
+                // Limpar VagaId da moto anteriormente alocada (se houver)
+                if (previousMotoId.HasValue)
+                {
+                    try
+                    {
+                        var prevMoto = await _motoRepo.ObterPorIdAsync(previousMotoId.Value);
+                        if (prevMoto != null)
+                        {
+                            // Indica "sem vaga" - o projeto usa 0 em alguns lugares; mantenha consistente
+                            prevMoto.VagaId = 0;
+                            await _motoRepo.AtualizarAsync(prevMoto);
+                        }
+                    }
+                    catch
+                    {
+                        // não falhar o fluxo principal por problema ao sincronizar a moto anterior
+                    }
+                }
+
+                // Atribuir VagaId na nova moto alocada (se houver)
+                if (newMotoId.HasValue)
+                {
+                    try
+                    {
+                        var newMoto = await _motoRepo.ObterPorIdAsync(newMotoId.Value);
+                        if (newMoto != null)
+                        {
+                            newMoto.VagaId = vagaAggregate.Id;
+                            await _motoRepo.AtualizarAsync(newMoto);
+                        }
+                    }
+                    catch
+                    {
+                        // não falhar o fluxo principal por problema ao sincronizar a nova moto
+                    }
+                }
+            }
         }
 
         public async Task RemoverAsync(VagaAggregate vagaAggregate)
         {
             var existing = await _vagaRepo.ObterPorIdAsync(vagaAggregate.Id);
             if (existing == null) throw new InvalidOperationException("Vaga não encontrada.");
+
+            // Antes de remover, se havia moto alocada, limpar VagaId dela
+            var allocatedMotoId = existing.Motos?.FirstOrDefault()?.Id;
+            if (allocatedMotoId.HasValue)
+            {
+                var moto = await _motoRepo.ObterPorIdAsync(allocatedMotoId.Value);
+                if (moto != null)
+                {
+                    moto.VagaId = 0;
+                    await _motoRepo.AtualizarAsync(moto);
+                }
+            }
 
             await _vagaRepo.RemoverAsync(existing);
         }
