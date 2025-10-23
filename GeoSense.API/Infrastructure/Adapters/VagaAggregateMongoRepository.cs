@@ -1,7 +1,7 @@
 ﻿using GeoSense.API.Domain.Aggregates;
 using GeoSense.API.Domain.Repositories;
 using GeoSense.API.Infrastructure.Mongo;
-using GeoSense.API.Infrastructure.Persistence;
+using GeoSense.API.Domain.Entities;
 
 namespace GeoSense.API.Infrastructure.Adapters
 {

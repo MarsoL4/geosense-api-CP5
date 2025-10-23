@@ -4,7 +4,7 @@ using Xunit;
 using Mongo2Go;
 using MongoDB.Driver;
 using GeoSense.API.Infrastructure.Mongo;
-using GeoSense.API.Infrastructure.Persistence;
+using GeoSense.API.Domain.Entities;
 
 namespace GeoSense.API.Tests.Integration
 {

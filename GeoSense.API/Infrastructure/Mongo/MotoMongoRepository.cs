@@ -1,4 +1,4 @@
-﻿using GeoSense.API.Infrastructure.Persistence;
+﻿using GeoSense.API.Domain.Entities;
 using MongoDB.Driver;
 
 namespace GeoSense.API.Infrastructure.Mongo

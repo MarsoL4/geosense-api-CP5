@@ -1,4 +1,4 @@
-﻿using GeoSense.API.Infrastructure.Persistence;
+﻿using GeoSense.API.Domain.Entities;
 using MongoDB.Driver;
 using System.Collections.Generic;
 using System.Threading.Tasks;

@@ -2,7 +2,7 @@
 
 namespace GeoSense.API.Domain.Aggregates
 {
-    using GeoSense.API.Infrastructure.Persistence;
+    using GeoSense.API.Domain.Entities;
 
     /// <summary>
     /// Aggregate root do domínio para Vaga.

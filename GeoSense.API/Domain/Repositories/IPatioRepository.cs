@@ -1,8 +1,8 @@
 ﻿namespace GeoSense.API.Domain.Repositories
 {
-    using GeoSense.API.Infrastructure.Persistence;
     using System.Threading.Tasks;
     using System.Collections.Generic;
+    using GeoSense.API.Domain.Entities;
 
     public interface IPatioRepository
     {

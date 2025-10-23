@@ -1,12 +1,12 @@
 ﻿using Xunit;
-using GeoSense.API.Controllers;
-using GeoSense.API.Infrastructure.Contexts;
-using GeoSense.API.Infrastructure.Repositories;
-using GeoSense.API.Services;
+using GeoSense.API.Api.Controllers;
+using GeoSense.API.Infrastructure.EF.Repositories;
+using GeoSense.API.Application.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using GeoSense.API.Domain.Repositories;
+using GeoSense.API.Infrastructure.EF.Contexts;
 
 namespace GeoSense.API.Tests
 {

@@ -1,16 +1,16 @@
 ﻿using Xunit;
-using GeoSense.API.Controllers;
-using GeoSense.API.Infrastructure.Contexts;
-using GeoSense.API.Infrastructure.Repositories;
-using GeoSense.API.Services;
+using GeoSense.API.Api.Controllers;
+using GeoSense.API.Infrastructure.EF.Repositories;
+using GeoSense.API.Application.Services;
 using Microsoft.EntityFrameworkCore;
-using GeoSense.API.DTOs;
+using GeoSense.API.Application.DTOs;
 using Microsoft.AspNetCore.Mvc;
 using AutoMapper;
-using GeoSense.API.AutoMapper;
-using GeoSense.API.DTOs.Moto;
-using GeoSense.API.Infrastructure.Persistence;
+using GeoSense.API.Application.DTOs.Moto;
+using GeoSense.API.Domain.Entities;
 using GeoSense.API.Domain.Repositories;
+using GeoSense.API.Application.AutoMapper;
+using GeoSense.API.Infrastructure.EF.Contexts;
 
 namespace GeoSense.API.Tests
 {
